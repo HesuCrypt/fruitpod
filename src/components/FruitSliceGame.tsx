@@ -118,7 +118,7 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
     setFruits((prev) => [...prev, { id: fruitIdRef.current, x, y, vx, vy, radius, image, angle: 0, rotSpeed }]);
   }, []);
 
-  const gameLoop = useCallback((time: number) => {
+  const gameLoop = useCallback(() => {
     const area = gameAreaRef.current;
     if (!area) return;
     const rect = area.getBoundingClientRect();
@@ -176,7 +176,7 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
   useEffect(() => {
     let rafId: number;
     const tick = () => {
-      gameLoop(performance.now());
+      gameLoop();
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
