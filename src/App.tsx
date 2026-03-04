@@ -4,6 +4,8 @@ import VideoStartScreen from './components/VideoStartScreen';
 import Slide3Screen from './components/Slide3Screen';
 import PartBSlide1Screen from './components/PartBSlide1Screen';
 import PartBSlide2FinalLoadingScreen from './components/PartBSlide2FinalLoadingScreen';
+import FruitSliceGame from './components/FruitSliceGame';
+import PreloadVideos from './components/PreloadVideos';
 import MobileBlock from './components/MobileBlock';
 import RotateDeviceOverlay from './components/RotateDeviceOverlay';
 import { isMobileOrTablet, isPortrait } from './lib/device';
@@ -15,6 +17,7 @@ function App() {
   const [hasCompletedSlide3, setHasCompletedSlide3] = useState(false);
   const [hasCompletedPartBSlide1, setHasCompletedPartBSlide1] = useState(false);
   const [hasCompletedPartBSlide2Final, setHasCompletedPartBSlide2Final] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
   const [isPortraitMode, setIsPortraitMode] = useState(true);
   const [isReady, setIsReady] = useState(false);
@@ -62,6 +65,7 @@ function App() {
 
   return (
     <main className="relative w-full h-full overflow-hidden select-none touch-none bg-issy-pink">
+      <PreloadVideos />
       {!username ? (
         <UsernameScreen onContinue={handleUsernameSubmit} />
       ) : !hasStarted ? (
@@ -72,12 +76,14 @@ function App() {
         <PartBSlide1Screen onNext={() => setHasCompletedPartBSlide1(true)} />
       ) : !hasCompletedPartBSlide2Final ? (
         <PartBSlide2FinalLoadingScreen onComplete={() => setHasCompletedPartBSlide2Final(true)} />
+      ) : !gameOver ? (
+        <FruitSliceGame onGameOver={() => setGameOver(true)} />
       ) : (
-        <div className="flex flex-col items-center justify-center w-full h-full">
-          <div className="font-pixel text-base text-issy-accent uppercase animate-pulse">
+        <div className="flex flex-col items-center justify-center w-full h-full bg-issy-pink">
+          <div className="font-pixel text-lg text-issy-accent uppercase animate-pulse">
             Welcome, {username}!
           </div>
-          <div className="mt-4 font-pixel text-sm text-gray-500 uppercase">
+          <div className="mt-4 font-pixel text-base text-gray-500 uppercase">
             Ready for next screen...
           </div>
         </div>

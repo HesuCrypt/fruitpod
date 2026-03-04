@@ -19,7 +19,7 @@ const RotateDeviceOverlay: React.FC = () => {
                     <path d="M12 6c3 0 5 2 5 2l-2 2" />
                 </svg>
             </div>
-            <p className="font-pixel text-[10px] leading-loose uppercase">
+            <p className="font-pixel text-sm leading-loose uppercase">
                 Please rotate your device to portrait mode
             </p>
         </div>
