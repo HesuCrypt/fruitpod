@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@font-face {
+  font-family: "Acknowledge TT";
+  src: url("../assets/fonts/acknowtt.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   --color-issy-pink: #f36b65;
@@ -8,7 +14,7 @@
   --color-issy-accent: #db4b4b;
   --color-issy-accentDark: #cd4c6f;
 
-  --font-pixel: "Press Start 2P", cursive;
+  --font-pixel: "Acknowledge TT", cursive;
 }
 
 :root {

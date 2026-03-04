@@ -38,7 +38,7 @@ const UsernameScreen: React.FC<UsernameScreenProps> = ({ onContinue }) => {
             <div className="relative w-full max-w-[390px] flex flex-col items-center">
                 <label
                     htmlFor="username"
-                    className="font-pixel text-[10px] mb-8 text-center tracking-tight leading-relaxed uppercase text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                    className="font-pixel text-sm mb-8 text-center tracking-tight leading-relaxed uppercase text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 >
                     Enter your Instagram username:
                 </label>
@@ -54,7 +54,7 @@ const UsernameScreen: React.FC<UsernameScreenProps> = ({ onContinue }) => {
                             onKeyPress={handleKeyPress}
                             placeholder="YOUR_USERNAME"
                             className={cn(
-                                "w-full h-14 bg-white px-4 pr-20 font-pixel text-[10px] outline-none",
+                                "w-full h-14 bg-white px-4 pr-20 font-pixel text-sm outline-none",
                                 "border-4 border-black border-r-0 rounded-l-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)]",
                                 "placeholder:text-gray-300 transition-all focus:bg-pink-50"
                             )}
@@ -83,7 +83,7 @@ const UsernameScreen: React.FC<UsernameScreenProps> = ({ onContinue }) => {
 
                 </div>
 
-                <p className="font-pixel text-[8px] text-white opacity-60 text-center leading-loose drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
+                <p className="font-pixel text-xs text-white opacity-60 text-center leading-loose drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
                     USE ALPHANUMERIC AND UNDERSCORE ONLY
                 </p>
             </div>

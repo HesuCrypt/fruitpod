@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import UsernameScreen from './components/UsernameScreen';
 import VideoStartScreen from './components/VideoStartScreen';
 import Slide3Screen from './components/Slide3Screen';
+import PartBSlide1Screen from './components/PartBSlide1Screen';
+import PartBSlide2FinalLoadingScreen from './components/PartBSlide2FinalLoadingScreen';
 import MobileBlock from './components/MobileBlock';
 import RotateDeviceOverlay from './components/RotateDeviceOverlay';
 import { isMobileOrTablet, isPortrait } from './lib/device';
@@ -11,6 +13,8 @@ function App() {
   const [username, setUsername] = useState<string | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
   const [hasCompletedSlide3, setHasCompletedSlide3] = useState(false);
+  const [hasCompletedPartBSlide1, setHasCompletedPartBSlide1] = useState(false);
+  const [hasCompletedPartBSlide2Final, setHasCompletedPartBSlide2Final] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
   const [isPortraitMode, setIsPortraitMode] = useState(true);
   const [isReady, setIsReady] = useState(false);
@@ -64,12 +68,16 @@ function App() {
         <VideoStartScreen onStart={() => setHasStarted(true)} />
       ) : !hasCompletedSlide3 ? (
         <Slide3Screen onComplete={() => setHasCompletedSlide3(true)} />
+      ) : !hasCompletedPartBSlide1 ? (
+        <PartBSlide1Screen onNext={() => setHasCompletedPartBSlide1(true)} />
+      ) : !hasCompletedPartBSlide2Final ? (
+        <PartBSlide2FinalLoadingScreen onComplete={() => setHasCompletedPartBSlide2Final(true)} />
       ) : (
         <div className="flex flex-col items-center justify-center w-full h-full">
-          <div className="font-pixel text-[10px] text-issy-accent uppercase animate-pulse">
+          <div className="font-pixel text-base text-issy-accent uppercase animate-pulse">
             Welcome, {username}!
           </div>
-          <div className="mt-4 font-pixel text-[8px] text-gray-500 uppercase">
+          <div className="mt-4 font-pixel text-sm text-gray-500 uppercase">
             Ready for next screen...
           </div>
         </div>
