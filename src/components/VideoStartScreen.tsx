@@ -9,12 +9,14 @@ interface VideoStartScreenProps {
 
 const VideoStartScreen: React.FC<VideoStartScreenProps> = ({ onStart }) => {
     const [isPressed, setIsPressed] = useState(false);
+    const [videoReady, setVideoReady] = useState(false);
+    const [videoError, setVideoError] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
-        video.play().catch(() => {});
+        video.play().catch(() => setVideoError(true));
     }, []);
 
     const handleStart = () => {
@@ -22,16 +24,19 @@ const VideoStartScreen: React.FC<VideoStartScreenProps> = ({ onStart }) => {
     };
 
     return (
-        <div className="relative w-full h-full overflow-hidden">
-            {/* Video fills entire screen */}
+        <div className="relative w-full h-full overflow-hidden bg-issy-pink">
             <video
                 ref={videoRef}
                 src="/video-loop.mp4"
-                className="absolute inset-0 w-full h-full object-cover pixelated"
+                preload="auto"
+                className={`absolute inset-0 w-full h-full object-cover pixelated transition-opacity duration-300 ${videoReady && !videoError ? 'opacity-100' : 'opacity-0'}`}
                 playsInline
                 muted
                 loop
                 autoPlay
+                onLoadedData={() => setVideoReady(true)}
+                onCanPlay={() => setVideoReady(true)}
+                onError={() => setVideoError(true)}
             />
 
             {/* START button overlaid at bottom center - adjust pb-* to move higher (e.g. pb-32) or lower (e.g. pb-10) */}

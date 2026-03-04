@@ -11,23 +11,36 @@ interface PartBSlide1ScreenProps {
 
 const PartBSlide1Screen: React.FC<PartBSlide1ScreenProps> = ({ onNext }) => {
     const [isPressed, setIsPressed] = useState(false);
+    const [videoReady, setVideoReady] = useState(false);
+    const [videoError, setVideoError] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
-        video.play().catch(() => {});
+        video.play().catch(() => setVideoError(true));
     }, []);
 
+    useEffect(() => {
+        if (videoError) {
+            const t = setTimeout(onNext, 800);
+            return () => clearTimeout(t);
+        }
+    }, [videoError, onNext]);
+
     return (
-        <div className="relative w-full h-full overflow-hidden">
+        <div className="relative w-full h-full overflow-hidden bg-issy-pink">
             <video
                 ref={videoRef}
                 src={encodeURI(PART_B_SLIDE_1_VIDEO)}
-                className="absolute inset-0 w-full h-full object-cover pixelated"
+                preload="auto"
+                className={`absolute inset-0 w-full h-full object-cover pixelated transition-opacity duration-300 ${videoReady && !videoError ? 'opacity-100' : 'opacity-0'}`}
                 playsInline
                 muted
                 autoPlay
+                onLoadedData={() => setVideoReady(true)}
+                onCanPlay={() => setVideoReady(true)}
+                onError={() => setVideoError(true)}
             />
 
             {/* Next button - lower right */}
