@@ -23,7 +23,45 @@ type Fruit = {
   vy: number;
   radius: number;
   image: string;
+  angle: number;
+  rotSpeed: number;
 };
+
+type SliceParticle = {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  color: string;
+  size: number;
+};
+
+type SliceFlash = {
+  id: number;
+  x: number;
+  y: number;
+  life: number;
+};
+
+const MIN_SLASH_DIST = 14;
+
+function smoothPath(points: Array<{ x: number; y: number }>): Array<{ x: number; y: number }> {
+  if (points.length <= 2) return points;
+  const out: Array<{ x: number; y: number }> = [{ ...points[0] }];
+  for (let i = 1; i < points.length - 1; i++) {
+    const prev = points[i - 1];
+    const curr = points[i];
+    const next = points[i + 1];
+    out.push({
+      x: prev.x * 0.2 + curr.x * 0.6 + next.x * 0.2,
+      y: prev.y * 0.2 + curr.y * 0.6 + next.y * 0.2,
+    });
+  }
+  out.push({ ...points[points.length - 1] });
+  return out;
+}
 
 function lineSegmentIntersectsCircle(
   x1: number, y1: number, x2: number, y2: number,
@@ -50,9 +88,14 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
   const [fruityEssence, setFruityEssence] = useState(0);
   const [fruits, setFruits] = useState<Fruit[]>([]);
   const [popups, setPopups] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [sliceParticles, setSliceParticles] = useState<SliceParticle[]>([]);
+  const [sliceFlashes, setSliceFlashes] = useState<SliceFlash[]>([]);
+  const [slashPath, setSlashPath] = useState<Array<{ x: number; y: number }>>([]);
 
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<Array<{ x: number; y: number }>>([]);
+  const particleIdRef = useRef(0);
+  const flashIdRef = useRef(0);
   const lastSlicedAtRef = useRef(0);
   const fruitIdRef = useRef(0);
   const popupIdRef = useRef(0);
@@ -64,14 +107,15 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
     const rect = area.getBoundingClientRect();
     const w = rect.width;
     const h = rect.height;
-    const radius = 28 + Math.random() * 20;
+    const radius = 48 + Math.random() * 24;
     const x = radius + Math.random() * (w - radius * 2);
     const y = h + radius;
-    const vx = (Math.random() - 0.5) * 80;
-    const vy = -180 - Math.random() * 120;
+    const vx = (Math.random() - 0.5) * 140;
+    const vy = -580 - Math.random() * 220;
     const image = FRUIT_IMAGES[Math.floor(Math.random() * FRUIT_IMAGES.length)];
+    const rotSpeed = (Math.random() - 0.5) * 12;
     fruitIdRef.current += 1;
-    setFruits((prev) => [...prev, { id: fruitIdRef.current, x, y, vx, vy, radius, image }]);
+    setFruits((prev) => [...prev, { id: fruitIdRef.current, x, y, vx, vy, radius, image, angle: 0, rotSpeed }]);
   }, []);
 
   const gameLoop = useCallback((time: number) => {
@@ -81,21 +125,23 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
     const h = rect.height;
     const dt = 1 / 60;
 
+    const GRAVITY = 260;
     setFruits((prev) => {
       const next: Fruit[] = [];
       let exitCount = 0;
       prev.forEach((f) => {
         let nx = f.x + f.vx * dt;
         let ny = f.y + f.vy * dt;
-        const nvy = f.vy + 320 * dt;
+        const nvy = f.vy + GRAVITY * dt;
+        const nangle = f.angle + f.rotSpeed * dt;
         if (ny > h + f.radius) {
           exitCount += 1;
           return;
         }
         if (nx < f.radius) { nx = f.radius; }
         if (nx > rect.width - f.radius) { nx = rect.width - f.radius; }
-        const nvx = nx <= f.radius || nx >= rect.width - f.radius ? f.vx * -0.5 : f.vx;
-        next.push({ ...f, x: nx, y: ny, vx: nvx, vy: nvy });
+        const nvx = nx <= f.radius || nx >= rect.width - f.radius ? f.vx * -0.6 : f.vx;
+        next.push({ ...f, x: nx, y: ny, vx: nvx, vy: nvy, angle: nangle });
       });
       if (exitCount > 0) {
         setLives((l) => {
@@ -106,6 +152,25 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
       }
       return next;
     });
+
+    setSliceParticles((prev) => {
+      const next = prev
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx * dt,
+          y: p.y + p.vy * dt,
+          vy: p.vy + 400 * dt,
+          life: p.life - dt * 2.2,
+        }))
+        .filter((p) => p.life > 0);
+      return next;
+    });
+
+    setSliceFlashes((prev) =>
+      prev
+        .map((f) => ({ ...f, life: f.life - dt * 4 }))
+        .filter((f) => f.life > 0)
+    );
   }, []);
 
   useEffect(() => {
@@ -161,6 +226,29 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
             const popupId = popupIdRef.current;
             setPopups((pop) => [...pop, { id: popupId, x: f.x, y: f.y }]);
             setTimeout(() => setPopups((p) => p.filter((x) => x.id !== popupId)), 600);
+            const colors = ['#f472b6', '#fb923c', '#facc15', '#a78bfa', '#f87171'];
+            flashIdRef.current += 1;
+            setSliceFlashes((prev) => [
+              ...prev,
+              { id: flashIdRef.current, x: f.x, y: f.y, life: 1 },
+            ]);
+            const newParticles: SliceParticle[] = [];
+            for (let i = 0; i < 18; i++) {
+              const angle = (i / 18) * Math.PI * 2 + Math.random() * 0.5;
+              const speed = 100 + Math.random() * 140;
+              particleIdRef.current += 1;
+              newParticles.push({
+                id: particleIdRef.current,
+                x: f.x,
+                y: f.y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 80,
+                life: 1,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                size: 10 + Math.random() * 8,
+              });
+            }
+            setSliceParticles((prev) => [...prev, ...newParticles]);
           }
         });
       });
@@ -171,24 +259,42 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     pathRef.current = [];
     const pt = getLocalPoint(e.clientX, e.clientY);
-    if (pt) pathRef.current.push(pt);
+    if (pt) {
+      pathRef.current.push(pt);
+      setSlashPath([pt]);
+    }
   }, [getLocalPoint]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (e.buttons !== 1 && (e as unknown as { pressure?: number }).pressure === undefined) return;
     const pt = getLocalPoint(e.clientX, e.clientY);
-    if (pt) pathRef.current.push(pt);
+    if (!pt) return;
+    const path = pathRef.current;
+    if (path.length === 0) {
+      pathRef.current = [pt];
+      setSlashPath([pt]);
+      return;
+    }
+    const last = path[path.length - 1];
+    const dist = Math.hypot(pt.x - last.x, pt.y - last.y);
+    if (dist >= MIN_SLASH_DIST) {
+      pathRef.current = [...path, pt];
+      setSlashPath(smoothPath(pathRef.current));
+    }
   }, [getLocalPoint]);
 
   const handlePointerUp = useCallback(() => {
     checkSlice();
     pathRef.current = [];
+    setSlashPath([]);
   }, [checkSlice]);
 
   useEffect(() => {
-    const el = gameAreaRef.current;
-    if (!el) return;
-    const onUp = () => { checkSlice(); pathRef.current = []; };
+    const onUp = () => {
+      checkSlice();
+      pathRef.current = [];
+      setSlashPath([]);
+    };
     window.addEventListener('pointerup', onUp);
     return () => window.removeEventListener('pointerup', onUp);
   }, [checkSlice]);
@@ -239,12 +345,13 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
         {fruits.map((f) => (
           <div
             key={f.id}
-            className="absolute pointer-events-none pixelated"
+            className="absolute pointer-events-none pixelated origin-center"
             style={{
               left: f.x - f.radius,
               top: f.y - f.radius,
               width: f.radius * 2,
               height: f.radius * 2,
+              transform: `rotate(${(f.angle * 180) / Math.PI}deg)`,
             }}
           >
             <img
@@ -255,6 +362,80 @@ const FruitSliceGame: React.FC<FruitSliceGameProps> = ({ onGameOver }) => {
             />
           </div>
         ))}
+        {sliceFlashes.map((flash) => (
+          <div
+            key={flash.id}
+            className="absolute pointer-events-none rounded-full border-2 border-white"
+            style={{
+              left: flash.x - 40,
+              top: flash.y - 40,
+              width: 80,
+              height: 80,
+              opacity: flash.life,
+              transform: `scale(${1.2 - flash.life * 0.4})`,
+              backgroundColor: 'rgba(255,200,220,0.4)',
+              boxShadow: '0 0 24px rgba(255,180,200,0.8)',
+            }}
+          />
+        ))}
+        {sliceParticles.map((p) => (
+          <div
+            key={p.id}
+            className="absolute pointer-events-none rounded-full"
+            style={{
+              left: p.x - (p.size || 12) / 2,
+              top: p.y - (p.size || 12) / 2,
+              width: p.size || 12,
+              height: p.size || 12,
+              backgroundColor: p.color,
+              opacity: p.life,
+              boxShadow: `0 0 ${(p.size || 12) * 0.8}px ${p.color}`,
+              transform: `scale(${0.6 + p.life * 0.4})`,
+            }}
+          />
+        ))}
+        {slashPath.length >= 2 && (() => {
+          const pts = smoothPath(slashPath);
+          const d = pts.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x} ${pt.y}`).join(' ');
+          return (
+            <svg
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              style={{ left: 0, top: 0 }}
+            >
+              <defs>
+                <linearGradient id="slash-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(255,255,255,0.9)" />
+                  <stop offset="50%" stopColor="rgba(147,197,253,0.85)" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0.9)" />
+                </linearGradient>
+                <filter id="slash-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <path
+                d={d}
+                fill="none"
+                stroke="url(#slash-gradient)"
+                strokeWidth="16"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#slash-glow)"
+              />
+              <path
+                d={d}
+                fill="none"
+                stroke="rgba(255,255,255,0.6)"
+                strokeWidth="10"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          );
+        })()}
         {popups.map((p) => (
           <div
             key={p.id}
