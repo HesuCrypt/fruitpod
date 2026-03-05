@@ -38,7 +38,7 @@ const UsernameScreen: React.FC<UsernameScreenProps> = ({ onContinue }) => {
             <div className="relative w-full max-w-[390px] flex flex-col items-center">
                 <label
                     htmlFor="username"
-                    className="font-pixel text-base mb-8 text-center tracking-tight leading-relaxed uppercase text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                    className="font-pixel text-lg mb-8 text-center tracking-tight leading-relaxed uppercase text-white drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 >
                     Enter your Instagram username:
                 </label>
@@ -54,7 +54,7 @@ const UsernameScreen: React.FC<UsernameScreenProps> = ({ onContinue }) => {
                             onKeyPress={handleKeyPress}
                             placeholder="YOUR_USERNAME"
                             className={cn(
-                                "w-full h-14 bg-white px-4 pr-20 font-pixel text-base outline-none",
+                                "w-full h-14 bg-white px-4 pr-20 font-pixel text-lg outline-none",
                                 "border-4 border-black border-r-0 rounded-l-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)]",
                                 "placeholder:text-gray-300 transition-all focus:bg-pink-50"
                             )}

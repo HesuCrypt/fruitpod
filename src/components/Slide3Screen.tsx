@@ -9,6 +9,7 @@ const SLIDE_3_VIDEO_SRC = encodeURI('/Slide 3 (PART A) - FRUIT JAM (NO AUDIO YET
 const Slide3Screen: React.FC<Slide3ScreenProps> = ({ onComplete }) => {
     const [videoReady, setVideoReady] = useState(false);
     const [videoError, setVideoError] = useState(false);
+    const [skipPressed, setSkipPressed] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
@@ -43,6 +44,17 @@ const Slide3Screen: React.FC<Slide3ScreenProps> = ({ onComplete }) => {
                 onError={() => setVideoError(true)}
                 onEnded={handleEnded}
             />
+            <button
+                type="button"
+                onClick={onComplete}
+                onPointerDown={() => setSkipPressed(true)}
+                onPointerUp={() => setSkipPressed(false)}
+                onPointerLeave={() => setSkipPressed(false)}
+                className="absolute bottom-6 right-6 z-10 font-pixel text-2xl uppercase cursor-pointer bg-transparent border-0 p-0 touch-manipulation transition-colors duration-100"
+                style={{ color: skipPressed ? '#ea89b7' : '#ce559d' }}
+            >
+                Skip
+            </button>
         </div>
     );
 };
