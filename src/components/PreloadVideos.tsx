@@ -25,6 +25,7 @@ const PreloadVideos: React.FC = () => {
       video.setAttribute('style', 'position:absolute;width:0;height:0;pointer-events:none;opacity:0;');
       video.src = url;
       document.body.appendChild(video);
+      video.load(); // Force immediate download, don't wait for browser to decide
       videos.push(video);
     });
     videosRef.current = videos;
