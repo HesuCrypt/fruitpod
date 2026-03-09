@@ -11,6 +11,7 @@ import { isMobileOrTablet, isPortrait } from './lib/device';
 import './styles/globals.css';
 
 function App() {
+  const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
   const [hasCompletedSlide3, setHasCompletedSlide3] = useState(false);
@@ -64,7 +65,9 @@ function App() {
   return (
     <main className="relative w-full h-full overflow-hidden select-none touch-none bg-issy-pink">
       <PreloadVideos />
-      {!username ? (
+      {!hasCompletedInitialLoad ? (
+        <PartBSlide2FinalLoadingScreen onComplete={() => setHasCompletedInitialLoad(true)} />
+      ) : !username ? (
         <UsernameScreen onContinue={handleUsernameSubmit} />
       ) : !hasStarted ? (
         <VideoStartScreen onStart={() => setHasStarted(true)} />
