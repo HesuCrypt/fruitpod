@@ -1,8 +1,8 @@
 import React from 'react';
-import type { ScoreConfig } from '../GameCanvas';
+import type { ScoreUpdatePayload } from '../GameCanvas';
 
 interface HUDProps {
-  scoreConfig: ScoreConfig;
+  scoreConfig: ScoreUpdatePayload;
 }
 
 const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
@@ -18,9 +18,8 @@ const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
               Score
             </span>
             <span
-              className={`text-2xl sm:text-3xl transition-colors duration-200 ${
-                isFrenzy ? 'text-yellow-400' : 'text-white'
-              }`}
+              className={`text-2xl sm:text-3xl transition-colors duration-200 ${isFrenzy ? 'text-yellow-400' : 'text-white'
+                }`}
             >
               {String(score).padStart(5, '0')}
             </span>
@@ -35,9 +34,8 @@ const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
           {[1, 2, 3].map((i) => (
             <span
               key={i}
-              className={`text-2xl sm:text-3xl ${
-                i <= lives ? 'text-red-500' : 'text-gray-600'
-              }`}
+              className={`text-2xl sm:text-3xl ${i <= lives ? 'text-red-500' : 'text-gray-600'
+                }`}
               aria-hidden
             >
               ♥
@@ -50,9 +48,8 @@ const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
         <div className="w-full max-w-md">
           <div className="flex justify-between items-end mb-1 px-1">
             <span
-              className={`text-[10px] font-bold ${
-                isFrenzy ? 'text-yellow-400 animate-pulse' : 'text-gray-400'
-              }`}
+              className={`text-[10px] font-bold ${isFrenzy ? 'text-yellow-400 animate-pulse' : 'text-gray-400'
+                }`}
             >
               {isFrenzy ? 'FRENZY!' : 'Frenzy bar'}
             </span>
@@ -62,11 +59,10 @@ const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
           </div>
           <div className="h-4 w-full bg-neutral-800 border-2 border-white/30 rounded-full overflow-hidden">
             <div
-              className={`h-full transition-all duration-150 ${
-                isFrenzy
+              className={`h-full transition-all duration-150 ${isFrenzy
                   ? 'bg-yellow-400'
                   : 'bg-gradient-to-r from-issy-pink to-issy-accent'
-              }`}
+                }`}
               style={{ width: `${pct}%` }}
             />
           </div>

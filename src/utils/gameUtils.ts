@@ -37,11 +37,13 @@ export function lineIntersectsCircle(
   return distSq < circle.radius * circle.radius;
 }
 
-export enum EntityType {
-  FRUIT = 'fruit',
-  BOMB = 'bomb',
-  POWERUP = 'powerup',
-}
+export const EntityType = {
+  FRUIT: 'fruit',
+  BOMB: 'bomb',
+  POWERUP: 'powerup',
+} as const;
+
+export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 
 export interface GameEntity {
   id: string;

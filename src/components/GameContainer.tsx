@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import GameCanvas, { type ScoreConfig } from './GameCanvas';
+import GameCanvas, { type ScoreUpdatePayload } from './GameCanvas';
 import HUD from './game/HUD';
 import GameOver from './game/GameOver';
 import MainMenu from './game/MainMenu';
@@ -10,7 +10,7 @@ interface GameContainerProps {
   onDone?: () => void;
 }
 
-const initialScoreConfig: ScoreConfig = {
+const initialScoreConfig: ScoreUpdatePayload = {
   score: 0,
   lives: 3,
   combo: 0,
@@ -20,7 +20,7 @@ const initialScoreConfig: ScoreConfig = {
 
 const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
   const [gameState, setGameState] = useState<GameState>('MENU');
-  const [scoreConfig, setScoreConfig] = useState<ScoreConfig>(initialScoreConfig);
+  const [scoreConfig, setScoreConfig] = useState<ScoreUpdatePayload>(initialScoreConfig);
   const [whiteoutActive, setWhiteoutActive] = useState(false);
 
   const handleBombHit = useCallback(() => {
@@ -62,9 +62,8 @@ const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
 
       {/* Bomb whiteout flash */}
       <div
-        className={`absolute inset-0 bg-white pointer-events-none z-40 transition-opacity duration-75 ${
-          whiteoutActive ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`absolute inset-0 bg-white pointer-events-none z-40 transition-opacity duration-75 ${whiteoutActive ? 'opacity-100' : 'opacity-0'
+          }`}
         aria-hidden
       />
     </div>

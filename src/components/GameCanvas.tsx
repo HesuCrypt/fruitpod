@@ -28,7 +28,7 @@ const FRENZY_MAX_CHARGE = 100;
 const MISSED_Y_THRESHOLD = CANVAS_HEIGHT + 100;
 const SHAKE_DECAY = 2;
 
-export interface ScoreConfig {
+export interface ScoreUpdatePayload {
   score: number;
   lives: number;
   combo: number;
@@ -39,7 +39,7 @@ export interface ScoreConfig {
 interface GameCanvasProps {
   gameState: 'MENU' | 'PLAYING' | 'GAME_OVER';
   setGameState: (state: 'MENU' | 'PLAYING' | 'GAME_OVER') => void;
-  onScoreUpdate?: (config: ScoreConfig) => void;
+  onScoreUpdate?: (config: ScoreUpdatePayload) => void;
   onBombHit?: () => void;
 }
 
@@ -204,8 +204,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
           frenzyChargeRef.current = Math.min(
             FRENZY_MAX_CHARGE,
             frenzyChargeRef.current +
-              FRENZY_CHARGE_PER_SLICE +
-              (comboRef.current.count >= 3 ? FRENZY_CHARGE_BONUS_COMBO : 0)
+            FRENZY_CHARGE_PER_SLICE +
+            (comboRef.current.count >= 3 ? FRENZY_CHARGE_BONUS_COMBO : 0)
           );
           if (frenzyChargeRef.current >= FRENZY_MAX_CHARGE) {
             frenzyTimerRef.current = FRENZY_DURATION;
