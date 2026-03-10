@@ -21,6 +21,7 @@ import {
   SCORE_UPDATE_INTERVAL,
   MAX_ENTITIES,
   FRENZY_SPAWN_INTERVAL_BASE,
+  BOMB_EXPLOSION_DURATION_MS,
 } from '../constants';
 import type { Point } from '../input/InputManager';
 
@@ -130,6 +131,12 @@ export class GameEngine {
     Physics.updateFloatingTexts(s.floatingTexts, scale);
     Physics.filterFloatingTextsAlive(s.floatingTexts);
 
+    for (let i = s.bombExplosions.length - 1; i >= 0; i--) {
+      if (nowMs - s.bombExplosions[i].startTime > BOMB_EXPLOSION_DURATION_MS) {
+        s.bombExplosions.splice(i, 1);
+      }
+    }
+
     s.shake = Physics.decayShake(s.shake, scale);
 
     if (Math.floor(s.time) % SCORE_UPDATE_INTERVAL === 0 && this.callbacks.onScoreUpdate) {
@@ -148,6 +155,7 @@ export class GameEngine {
       particles: s.particles,
       trail: s.trail,
       floatingTexts: s.floatingTexts,
+      bombExplosions: s.bombExplosions,
       shake: s.shake,
       frenzyEndTime: s.frenzyEndTime,
       frenzyActivationTime: s.frenzyActivationTime,
@@ -191,6 +199,13 @@ export class GameEngine {
       this.state.spawn.nextSpawnTime = this.state.time + FRENZY_SPAWN_INTERVAL_BASE;
     }
 
+    if (result.bombExplosionAt) {
+      this.state.bombExplosions.push({
+        x: result.bombExplosionAt.x,
+        y: result.bombExplosionAt.y,
+        startTime: Date.now(),
+      });
+    }
     if (result.gameOver) {
       this.state.isGameOverProcessing = true;
       this.callbacks.onBombHit?.();

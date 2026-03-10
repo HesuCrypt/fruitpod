@@ -65,32 +65,32 @@ body {
   transform: scale(0.95) translateY(2px);
 }
 
-/* Frenzy Mode – hyper-mode style flicker/glow, pixel aesthetic */
+/* Frenzy Mode – pink theme flicker/glow, pixel aesthetic */
 @keyframes frenzy-glow {
   0%, 100% {
-    filter: brightness(1) drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+    filter: brightness(1) drop-shadow(0 0 6px rgba(255, 105, 180, 0.6));
     opacity: 1;
   }
   25% {
-    filter: brightness(1.15) drop-shadow(0 0 12px rgba(255, 235, 0, 0.8));
+    filter: brightness(1.15) drop-shadow(0 0 12px rgba(255, 182, 193, 0.8));
     opacity: 0.95;
   }
   50% {
-    filter: brightness(1.08) drop-shadow(0 0 8px rgba(255, 220, 0, 0.7));
+    filter: brightness(1.08) drop-shadow(0 0 8px rgba(255, 105, 180, 0.7));
     opacity: 1;
   }
   75% {
-    filter: brightness(1.12) drop-shadow(0 0 10px rgba(255, 230, 0, 0.75));
+    filter: brightness(1.12) drop-shadow(0 0 10px rgba(255, 150, 200, 0.75));
     opacity: 0.98;
   }
 }
 
 @keyframes frenzy-border-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 2px rgba(255, 235, 0, 0.4);
+    box-shadow: 0 0 0 2px rgba(255, 182, 193, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(255, 220, 0, 0.6);
+    box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.6);
   }
 }
 

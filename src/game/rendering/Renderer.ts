@@ -13,11 +13,14 @@ import {
   FRUIT_COLOR,
   BOMB_COLOR,
   FRENZY_POP_IN_DURATION_MS,
+  BOMB_EXPLOSION_DURATION_MS,
 } from '../constants';
+import type { BombExplosionEffect } from '../core/GameStateManager';
 
 export interface RenderAssets {
   fruitImages: (HTMLImageElement | null)[];
   bombImage: HTMLImageElement | null;
+  bombExplosionImage: HTMLImageElement | null;
   frenzyImage: HTMLImageElement | null;
 }
 
@@ -27,6 +30,7 @@ export interface RenderState {
   particles: Particle[];
   trail: TrailPoint[];
   floatingTexts: FloatingText[];
+  bombExplosions: BombExplosionEffect[];
   shake: number;
   frenzyEndTime: number;
   frenzyActivationTime: number;
@@ -55,41 +59,41 @@ function drawFruitImage(
   ctx.drawImage(img, -radius, -radius, d, d);
 }
 
-const FRENZY_LIGHT_COLORS = [
-  [255, 100, 150],   // pink
-  [255, 200, 100],   // orange
-  [255, 255, 120],   // yellow
-  [120, 255, 180],   // mint
-  [100, 200, 255],   // cyan
-  [200, 150, 255],   // purple
-  [255, 150, 200],   // magenta
+const FRENZY_PINK_COLORS = [
+  [255, 105, 180],   // hot pink
+  [255, 182, 193],   // light pink
+  [255, 20, 147],    // deep pink
+  [255, 192, 203],   // pink
+  [219, 112, 147],   // pale violet red
+  [255, 105, 180],   // hot pink
+  [255, 150, 200],   // bright pink
 ];
 
 function drawFrenzyOverlay(ctx: CanvasRenderingContext2D, nowMs: number): void {
-  const pulse = 0.08 + 0.05 * Math.sin(nowMs * 0.003);
-  const flicker = 0.02 + 0.02 * Math.sin(nowMs * 0.012);
-  ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
+  const pulse = 0.1 + 0.06 * Math.sin(nowMs * 0.003);
+  const flicker = 0.05 + 0.04 * Math.sin(nowMs * 0.012);
+  ctx.fillStyle = `rgba(255, 105, 180, ${pulse})`;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  ctx.fillStyle = `rgba(255, 255, 220, ${flicker})`;
+  ctx.fillStyle = `rgba(255, 182, 193, ${flicker})`;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  const lightIndex = Math.floor(nowMs / 80) % FRENZY_LIGHT_COLORS.length;
-  const [r, g, b] = FRENZY_LIGHT_COLORS[lightIndex];
-  const flash = 0.06 + 0.04 * Math.sin(nowMs * 0.02);
+  const lightIndex = Math.floor(nowMs / 120) % FRENZY_PINK_COLORS.length;
+  const [r, g, b] = FRENZY_PINK_COLORS[lightIndex];
+  const flash = 0.2 + 0.15 * Math.sin(nowMs * 0.025);
   ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${flash})`;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  const cornerFlash = 0.03 * (Math.sin(nowMs * 0.015) * 0.5 + 0.5);
-  ctx.fillStyle = `rgba(255, 180, 255, ${cornerFlash})`;
+  const cornerFlash = 0.1 + 0.08 * (Math.sin(nowMs * 0.02) * 0.5 + 0.5);
+  ctx.fillStyle = `rgba(255, 150, 200, ${cornerFlash})`;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
   const borderGlow = 0.5 + 0.35 * Math.sin(nowMs * 0.005);
-  ctx.shadowColor = 'rgba(255, 200, 0, 0.9)';
+  ctx.shadowColor = 'rgba(255, 105, 180, 0.9)';
   ctx.shadowBlur = 20 * borderGlow;
-  ctx.strokeStyle = `rgba(255, 235, 0, ${borderGlow})`;
+  ctx.strokeStyle = `rgba(255, 182, 193, ${borderGlow})`;
   ctx.lineWidth = 12;
   ctx.strokeRect(6, 6, CANVAS_WIDTH - 12, CANVAS_HEIGHT - 12);
   ctx.shadowBlur = 0;
-  ctx.strokeStyle = `rgba(255, 220, 0, ${0.4 + 0.3 * Math.sin(nowMs * 0.004)})`;
+  ctx.strokeStyle = `rgba(255, 105, 180, ${0.5 + 0.35 * Math.sin(nowMs * 0.004)})`;
   ctx.lineWidth = 6;
   ctx.strokeRect(6, 6, CANVAS_WIDTH - 12, CANVAS_HEIGHT - 12);
 }
@@ -108,8 +112,12 @@ function drawFrenzyCenterText(
   const shake = inPopIn ? (Math.random() - 0.5) * 4 : 0;
   const cx = CANVAS_WIDTH / 2 + shake;
   const cy = CANVAS_HEIGHT / 2 + (inPopIn ? (Math.random() - 0.5) * 3 : 0);
-  const glowFlicker = 0.7 + 0.3 * Math.sin(nowMs * 0.008);
   const fontSize = Math.min(52, 28 + (CANVAS_HEIGHT / 800) * 24);
+
+  const textColorIndex = Math.floor(nowMs / 150) % FRENZY_PINK_COLORS.length;
+  const [tr, tg, tb] = FRENZY_PINK_COLORS[textColorIndex];
+  const textFlash = 0.85 + 0.15 * Math.sin(nowMs * 0.02);
+  const glowBlur = 18 + 14 * Math.sin(nowMs * 0.015);
 
   ctx.save();
   ctx.translate(cx, cy);
@@ -117,16 +125,16 @@ function drawFrenzyCenterText(
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font = `bold ${fontSize}px ${PIXEL_FONT}`;
-  ctx.shadowColor = 'rgba(255, 235, 0, 0.9)';
-  ctx.shadowBlur = 16 * glowFlicker;
-  ctx.fillStyle = '#FFD700';
+  ctx.shadowColor = `rgba(${tr}, ${tg}, ${tb}, 0.95)`;
+  ctx.shadowBlur = glowBlur;
+  ctx.fillStyle = `rgb(${tr}, ${tg}, ${tb})`;
   ctx.fillText('FRENZY MODE', 0, 0);
   ctx.shadowBlur = 0;
-  ctx.strokeStyle = 'rgba(255, 200, 0, 0.8)';
+  ctx.strokeStyle = `rgba(255, 255, 255, ${textFlash})`;
   ctx.lineWidth = 3;
   ctx.strokeText('FRENZY MODE', 0, 0);
-  ctx.fillStyle = '#FFF8DC';
-  ctx.globalAlpha = 0.5 + 0.2 * Math.sin(nowMs * 0.006);
+  ctx.globalAlpha = 0.6 + 0.4 * Math.sin(nowMs * 0.012);
+  ctx.fillStyle = `rgba(255, 255, 255, 0.9)`;
   ctx.fillText('FRENZY MODE', 0, 0);
   ctx.globalAlpha = 1;
   ctx.restore();
@@ -150,7 +158,7 @@ export function render(
   ctx.fillStyle = '#fcfcfc';
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  const { fruitImages, bombImage, frenzyImage } = assets;
+  const { fruitImages, bombImage, bombExplosionImage, frenzyImage } = assets;
 
   for (let i = 0; i < state.entities.length; i++) {
     const e = state.entities[i];
@@ -208,6 +216,21 @@ export function render(
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
+  }
+
+  for (let i = 0; i < state.bombExplosions.length; i++) {
+    const exp = state.bombExplosions[i];
+    const elapsed = nowMs - exp.startTime;
+    const t = Math.min(1, elapsed / BOMB_EXPLOSION_DURATION_MS);
+    const scale = 0.6 + t * 1.2;
+    const alpha = 1 - t * t;
+    if (alpha <= 0 || !bombExplosionImage?.complete || bombExplosionImage.naturalWidth === 0) continue;
+    ctx.save();
+    ctx.translate(exp.x, exp.y);
+    ctx.globalAlpha = alpha;
+    const size = 120 * scale;
+    ctx.drawImage(bombExplosionImage, -size / 2, -size / 2, size, size);
     ctx.restore();
   }
 

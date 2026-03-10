@@ -9,12 +9,19 @@ import type { SpawnState } from '../systems/SpawnSystem';
 import type { ComboState } from '../systems/ScoreSystem';
 import { FRENZY_DURATION_MS } from '../constants';
 
+export interface BombExplosionEffect {
+  x: number;
+  y: number;
+  startTime: number;
+}
+
 export interface GameState {
   entities: GameEntity[];
   slicedParts: SlicedPart[];
   particles: Particle[];
   trail: TrailPoint[];
   floatingTexts: FloatingText[];
+  bombExplosions: BombExplosionEffect[];
   score: number;
   combo: ComboState;
   lives: number;
@@ -36,6 +43,7 @@ export function createGameState(): GameState {
     particles: [],
     trail: [],
     floatingTexts: [],
+    bombExplosions: [],
     score: 0,
     combo: { count: 0, timer: 60 },
     lives: 3,
@@ -43,7 +51,7 @@ export function createGameState(): GameState {
     frenzyEndTime: 0,
     frenzyActivationTime: 0,
     spawn: {
-      nextSpawnTime: 15,
+      nextSpawnTime: 8,
       lastCremeCheekSpawnTime: now,
     },
     time: 0,
@@ -60,6 +68,7 @@ export function resetGameState(state: GameState): void {
   state.particles.length = 0;
   state.trail.length = 0;
   state.floatingTexts.length = 0;
+  state.bombExplosions.length = 0;
   state.score = 0;
   state.combo.count = 0;
   state.combo.timer = 60;
@@ -67,7 +76,7 @@ export function resetGameState(state: GameState): void {
   state.frenzyCharge = 0;
   state.frenzyEndTime = 0;
   state.frenzyActivationTime = 0;
-  state.spawn.nextSpawnTime = 15;
+  state.spawn.nextSpawnTime = 8;
   state.spawn.lastCremeCheekSpawnTime = now;
   state.time = 0;
   state.shake = 0;

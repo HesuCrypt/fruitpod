@@ -45,16 +45,18 @@ export function updateSlicedParts(parts: SlicedPart[], scale: number): void {
     p.y += p.vy * scale;
     p.vy += GRAVITY * scale;
     p.rotation += p.rotationSpeed * scale;
-    p.x = Math.max(
-      p.radius + EDGE_INSET,
-      Math.min(CANVAS_WIDTH - p.radius - EDGE_INSET, p.x)
-    );
   }
 }
 
+const SLICED_PART_MARGIN = 60;
+
 export function filterSlicedPartsOffScreen(parts: SlicedPart[]): void {
   for (let i = parts.length - 1; i >= 0; i--) {
-    if (parts[i].y > CANVAS_HEIGHT + parts[i].radius) parts.splice(i, 1);
+    const p = parts[i];
+    const offBottom = p.y > CANVAS_HEIGHT + p.radius + SLICED_PART_MARGIN;
+    const offLeft = p.x < -p.radius - SLICED_PART_MARGIN;
+    const offRight = p.x > CANVAS_WIDTH + p.radius + SLICED_PART_MARGIN;
+    if (offBottom || offLeft || offRight) parts.splice(i, 1);
   }
 }
 

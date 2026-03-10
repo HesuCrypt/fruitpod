@@ -25,6 +25,7 @@ const FRUIT_IMAGE_NAMES = [
 const GAME_IMAGE_URLS = [
   ...FRUIT_IMAGE_NAMES.map((n) => `/fruits/${encodeURIComponent(n)}`),
   `/fruits/${encodeURIComponent('BOMB.png')}`,
+  `/fruits/${encodeURIComponent('BOMB EXPLOSION 2.png')}`,
   `/fruits/${encodeURIComponent('CREME CHEEK FRENZY.png')}`,
 ];
 

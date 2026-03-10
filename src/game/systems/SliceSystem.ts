@@ -35,6 +35,7 @@ export interface SliceResult {
   spawnExtraFruits: GameEntity[];
   gameOver: boolean;
   freezeInputMs: number;
+  bombExplosionAt: { x: number; y: number } | null;
 }
 
 export function processSwipe(
@@ -66,6 +67,7 @@ export function processSwipe(
     spawnExtraFruits: [],
     gameOver: false,
     freezeInputMs: 0,
+    bombExplosionAt: null,
   };
 
   const now = Date.now();
@@ -87,6 +89,7 @@ export function processSwipe(
 
     if (entity.type === EntityType.BOMB) {
       result.toRemove.push(i);
+      result.bombExplosionAt = { x: entity.x, y: entity.y };
       result.particles.push(...createExplosion(entity.x, entity.y, '#555', 20));
       result.shake = 40;
       result.livesDelta = -1;

@@ -121,7 +121,8 @@ export interface Particle {
   gravity: number;
 }
 
-const SPLIT_SPEED = 3.5;
+const SPLIT_SPEED = 9;
+const SLICE_HALF_FALL_BOOST = 3;
 
 const BOMB_SPAWN_CHANCE = 0.12;
 /** When allowCremeCheek is true, this chance is used (only one Creme Cheek per 60s in GameCanvas). */
@@ -180,15 +181,16 @@ export function spawnEntity(
 export function createSlicedParts(entity: GameEntity): SlicedPart[] {
   if (entity.type === EntityType.BOMB || entity.type === EntityType.FRENZY_POWERUP) return [];
   const imageIndex = entity.imageIndex ?? 0;
+  const vy = entity.vy + SLICE_HALF_FALL_BOOST;
   return [
     {
       id: generateId(),
       x: entity.x,
       y: entity.y,
       vx: entity.vx - SPLIT_SPEED,
-      vy: entity.vy,
+      vy,
       rotation: entity.rotation,
-      rotationSpeed: -0.2,
+      rotationSpeed: -0.35,
       radius: entity.radius,
       scale: entity.scale,
       type: entity.type,
@@ -200,9 +202,9 @@ export function createSlicedParts(entity: GameEntity): SlicedPart[] {
       x: entity.x,
       y: entity.y,
       vx: entity.vx + SPLIT_SPEED,
-      vy: entity.vy,
+      vy,
       rotation: entity.rotation,
-      rotationSpeed: 0.2,
+      rotationSpeed: 0.35,
       radius: entity.radius,
       scale: entity.scale,
       type: entity.type,

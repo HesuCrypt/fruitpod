@@ -12,6 +12,7 @@ import {
   CANVAS_HEIGHT,
   FRUIT_IMAGE_NAMES,
   BOMB_IMAGE_NAME,
+  BOMB_EXPLOSION_IMAGE_NAME,
   FRENZY_IMAGE_NAME,
 } from '../game/constants';
 
@@ -41,6 +42,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const assetsRef = useRef<RenderAssets>({
     fruitImages: [],
     bombImage: null,
+    bombExplosionImage: null,
     frenzyImage: null,
   });
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
@@ -53,11 +55,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     });
     const bombImg = new Image();
     bombImg.src = `/fruits/${encodeURIComponent(BOMB_IMAGE_NAME)}`;
+    const bombExplosionImg = new Image();
+    bombExplosionImg.src = `/fruits/${encodeURIComponent(BOMB_EXPLOSION_IMAGE_NAME)}`;
     const frenzyImg = new Image();
     frenzyImg.src = `/fruits/${encodeURIComponent(FRENZY_IMAGE_NAME)}`;
     assetsRef.current = {
       fruitImages,
       bombImage: bombImg,
+      bombExplosionImage: bombExplosionImg,
       frenzyImage: frenzyImg,
     };
     engineRef.current = new GameEngine(

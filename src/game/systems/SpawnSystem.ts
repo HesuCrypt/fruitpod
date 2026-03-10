@@ -24,13 +24,13 @@ export interface SpawnState {
 
 export function createSpawnState(): SpawnState {
   return {
-    nextSpawnTime: 15,
+    nextSpawnTime: 8,
     lastCremeCheekSpawnTime: Date.now(),
   };
 }
 
 export function resetSpawnState(state: SpawnState): void {
-  state.nextSpawnTime = 15;
+  state.nextSpawnTime = 8;
   state.lastCremeCheekSpawnTime = Date.now();
 }
 
