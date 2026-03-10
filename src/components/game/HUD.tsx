@@ -7,6 +7,27 @@ interface HUDProps {
 
 const SCORE_GOAL = 100_000;
 
+/** Pixel-art heart (8×8 style) for lives display. */
+function PixelHeart({ filled }: { filled: boolean }) {
+  const color = filled ? '#ef4444' : '#6b7280';
+  return (
+    <svg
+      viewBox="0 0 8 8"
+      className="w-full h-full"
+      style={{ imageRendering: 'pixelated' }}
+    >
+      <rect x="1" y="0" width="2" height="2" fill={color} />
+      <rect x="5" y="0" width="2" height="2" fill={color} />
+      <rect x="0" y="2" width="2" height="2" fill={color} />
+      <rect x="2" y="2" width="2" height="2" fill={color} />
+      <rect x="4" y="2" width="2" height="2" fill={color} />
+      <rect x="6" y="2" width="2" height="2" fill={color} />
+      <rect x="0" y="4" width="8" height="2" fill={color} />
+      <rect x="2" y="6" width="4" height="2" fill={color} />
+    </svg>
+  );
+}
+
 const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
   const { score, lives, combo, isFrenzy } = scoreConfig;
   const scoreProgressPct = Math.min(100, (score / SCORE_GOAL) * 100);
@@ -39,14 +60,14 @@ const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
             </div>
           )}
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 items-center">
           {[1, 2, 3].map((i) => (
             <span
               key={i}
-              className={`text-3xl sm:text-4xl ${i <= lives ? 'text-red-500' : 'text-gray-600'}`}
+              className={`inline-block w-8 h-8 sm:w-9 sm:h-9 ${i <= lives ? 'opacity-100' : 'opacity-40'}`}
               aria-hidden
             >
-              ♥
+              <PixelHeart filled={i <= lives} />
             </span>
           ))}
         </div>

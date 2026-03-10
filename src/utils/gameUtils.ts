@@ -140,7 +140,8 @@ export function spawnEntity(
   allowCremeCheek: boolean = false
 ): GameEntity {
   const radius = 48;
-  const padding = Math.max(radius + 2, 50);
+  const edgeInset = 28;
+  const padding = radius + edgeInset;
   const x = randomRange(padding, canvasWidth - padding);
   const y = canvasHeight + randomRange(20, 60);
 
