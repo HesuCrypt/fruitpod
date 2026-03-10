@@ -37,6 +37,38 @@ export function lineIntersectsCircle(
   return distSq < circle.radius * circle.radius;
 }
 
+/**
+ * Check swipe path from p1 to p2 against circle using stepped segments
+ * so fast swipes don't miss. Step size ~min(radius, distance/4).
+ */
+export function swipeIntersectsCircle(
+  p1: { x: number; y: number },
+  p2: { x: number; y: number },
+  circle: { x: number; y: number; radius: number },
+  stepSize: number = 18
+): boolean {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const len = Math.hypot(dx, dy);
+  if (len <= 0) {
+    return lineIntersectsCircle(p1, p2, circle);
+  }
+  const steps = Math.max(1, Math.ceil(len / stepSize));
+  const inv = 1 / steps;
+  let ax = p1.x;
+  let ay = p1.y;
+  for (let i = 1; i <= steps; i++) {
+    const bx = p1.x + dx * (i * inv);
+    const by = p1.y + dy * (i * inv);
+    if (lineIntersectsCircle({ x: ax, y: ay }, { x: bx, y: by }, circle)) {
+      return true;
+    }
+    ax = bx;
+    ay = by;
+  }
+  return false;
+}
+
 export const EntityType = {
   FRUIT: 'fruit',
   BOMB: 'bomb',
@@ -92,30 +124,37 @@ export interface Particle {
 const SPLIT_SPEED = 3.5;
 
 const BOMB_SPAWN_CHANCE = 0.12;
-const FRENZY_POWERUP_CHANCE = 0.05;
+/** When allowCremeCheek is true, this chance is used (only one Creme Cheek per 60s in GameCanvas). */
+const FRENZY_POWERUP_CHANCE = 1;
 
-/** Center-biased spawn from bottom. isFrenzy: no bombs, no frenzy power-up, fruits only. */
+/**
+ * Spawn from bottom of screen with upward velocity. Natural parabolic arc via gravity.
+ * Randomize spawn angle, speed, and rotation for fluid Fruit Ninja–like movement.
+ * isFrenzy: no bombs, no Creme Cheek, fruits only.
+ * allowCremeCheek: when true and not isFrenzy, the next spawn may be Creme Cheek (caller enforces 60s cooldown).
+ */
 export function spawnEntity(
   canvasWidth: number,
   canvasHeight: number,
-  isFrenzy: boolean = false
+  isFrenzy: boolean = false,
+  allowCremeCheek: boolean = false
 ): GameEntity {
-  const padding = 60;
-  const x = randomRange(padding, canvasWidth - padding);
-  const y = canvasHeight + 40;
-
-  const distFromCenter = canvasWidth / 2 - x;
-  const centerBias = distFromCenter * randomRange(0.004, 0.007);
-  const vx = centerBias + randomRange(-0.8, 0.8);
-  const vy = randomRange(-13, -16);
-
   const radius = 48;
-  if (!isFrenzy && Math.random() < FRENZY_POWERUP_CHANCE) {
+  const padding = Math.max(radius + 2, 50);
+  const x = randomRange(padding, canvasWidth - padding);
+  const y = canvasHeight + randomRange(20, 60);
+
+  const angle = -Math.PI / 2 + randomRange(-0.35, 0.35);
+  const speed = randomRange(11, 16);
+  const vx = Math.cos(angle) * speed * randomRange(0.06, 0.12);
+  const vy = -Math.abs(Math.sin(angle) * speed);
+
+  if (!isFrenzy && allowCremeCheek && Math.random() < FRENZY_POWERUP_CHANCE) {
     return {
       id: generateId(),
       x, y, vx, vy,
-      rotation: 0,
-      rotationSpeed: randomRange(-0.12, 0.12),
+      rotation: randomRange(0, Math.PI * 2),
+      rotationSpeed: randomRange(-0.15, 0.15),
       radius,
       scale: 1,
       type: EntityType.FRENZY_POWERUP,
@@ -127,8 +166,8 @@ export function spawnEntity(
   return {
     id: generateId(),
     x, y, vx, vy,
-    rotation: 0,
-    rotationSpeed: randomRange(-0.12, 0.12),
+    rotation: randomRange(0, Math.PI * 2),
+    rotationSpeed: randomRange(-0.18, 0.18),
     radius,
     scale: 1,
     type: isBomb ? EntityType.BOMB : EntityType.FRUIT,

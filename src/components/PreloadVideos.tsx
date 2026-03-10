@@ -15,9 +15,21 @@ const VIDEO_URLS = [
   encodeURI('/FINAL PART B_SLIDE 3.mp4'),
 ];
 
-const IMAGE_URLS = [arrowBefore, arrowAfter];
+const FRUIT_IMAGE_NAMES = [
+  'GRAPES FULL.png',
+  'NEW PEACH.png',
+  'WATERMELON FULL.png',
+  'STRAWBERRY.png',
+  'FIG FULL.png',
+];
+const GAME_IMAGE_URLS = [
+  ...FRUIT_IMAGE_NAMES.map((n) => `/fruits/${encodeURIComponent(n)}`),
+  `/fruits/${encodeURIComponent('BOMB.png')}`,
+  `/fruits/${encodeURIComponent('CREME CHEEK FRENZY.png')}`,
+];
 
-const TOTAL_ASSETS = VIDEO_URLS.length + IMAGE_URLS.length;
+const IMAGE_URLS = [arrowBefore, arrowAfter];
+const TOTAL_ASSETS = VIDEO_URLS.length + IMAGE_URLS.length + GAME_IMAGE_URLS.length;
 
 export interface AssetLoaderProps {
   onProgress?: (loaded: number, total: number) => void;
@@ -40,6 +52,26 @@ const PreloadVideos: React.FC<AssetLoaderProps> = ({ onProgress, onInitialVideoR
       onProgressRef.current?.(readyCount, TOTAL_ASSETS);
     };
 
+    const markVideoDone = (video: HTMLVideoElement, done: () => void) => {
+      let called = false;
+      const doneOnce = () => {
+        if (called) return;
+        called = true;
+        video.removeEventListener('canplaythrough', onCanPlay);
+        video.removeEventListener('progress', onProgress);
+        done();
+      };
+      const onCanPlay = () => {
+        if (video.readyState >= 4) doneOnce();
+      };
+      const onProgress = () => {
+        if (video.readyState >= 4) doneOnce();
+      };
+      video.addEventListener('canplaythrough', onCanPlay, { once: true });
+      video.addEventListener('progress', onProgress);
+      if (video.readyState >= 4) doneOnce();
+    };
+
     const maybeDone = () => {
       readyCount += 1;
       reportProgress();
@@ -56,8 +88,8 @@ const PreloadVideos: React.FC<AssetLoaderProps> = ({ onProgress, onInitialVideoR
       video.setAttribute('style', style);
       video.src = url;
 
-      video.addEventListener('canplaythrough', maybeDone, { once: true });
       video.addEventListener('error', maybeDone, { once: true });
+      markVideoDone(video, maybeDone);
 
       document.body.appendChild(video);
       video.load();
@@ -65,6 +97,13 @@ const PreloadVideos: React.FC<AssetLoaderProps> = ({ onProgress, onInitialVideoR
     });
 
     IMAGE_URLS.forEach((url) => {
+      const img = new Image();
+      img.onload = maybeDone;
+      img.onerror = maybeDone;
+      img.src = url;
+    });
+
+    GAME_IMAGE_URLS.forEach((url) => {
       const img = new Image();
       img.onload = maybeDone;
       img.onerror = maybeDone;
