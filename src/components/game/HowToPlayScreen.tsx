@@ -45,12 +45,12 @@ const HowToPlayScreen: React.FC<HowToPlayScreenProps> = ({ onNext }) => {
   };
 
   return (
-    <div className="absolute inset-0 z-20 flex flex-col overflow-hidden bg-issy-pink font-pixel">
+    <div className="absolute inset-0 z-30 flex flex-col overflow-hidden bg-issy-pink font-pixel">
       <video
         ref={videoRef}
         src={FINAL_PART_B_VIDEO}
         preload="auto"
-        className={`absolute inset-0 w-full h-full object-cover pixelated transition-opacity duration-300 ${videoReady && !videoError ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 w-full h-full object-cover object-center pixelated transition-opacity duration-300 ${videoReady && !videoError ? 'opacity-100' : 'opacity-0'}`}
         playsInline
         muted
         autoPlay
@@ -60,7 +60,10 @@ const HowToPlayScreen: React.FC<HowToPlayScreenProps> = ({ onNext }) => {
         onError={() => setVideoError(true)}
       />
 
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 pb-6 pt-8 bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
+      <div
+        className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 pt-8 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"
+        style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+      >
         <div className="pointer-events-auto">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input

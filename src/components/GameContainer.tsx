@@ -2,8 +2,7 @@ import React, { useState, useCallback } from 'react';
 import GameCanvas, { type ScoreUpdatePayload } from './GameCanvas';
 import HUD from './game/HUD';
 import GameOver from './game/GameOver';
-import MainMenu from './game/MainMenu';
-import HowToPlayScreen, { getSkipTutorial } from './game/HowToPlayScreen';
+import HowToPlayScreen from './game/HowToPlayScreen';
 
 export type GameState = 'MENU' | 'PLAYING' | 'GAME_OVER';
 
@@ -21,7 +20,6 @@ const initialScoreConfig: ScoreUpdatePayload = {
 
 const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
   const [gameState, setGameState] = useState<GameState>('MENU');
-  const [showTutorial, setShowTutorial] = useState(() => !getSkipTutorial());
   const [scoreConfig, setScoreConfig] = useState<ScoreUpdatePayload>(initialScoreConfig);
   const [whiteoutActive, setWhiteoutActive] = useState(false);
 
@@ -34,6 +32,10 @@ const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
   }, []);
 
   const handleRestart = useCallback(() => {
+    setGameState('PLAYING');
+  }, []);
+
+  const handleFinalPartBNext = useCallback(() => {
     setGameState('PLAYING');
   }, []);
 
@@ -50,11 +52,8 @@ const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
       </div>
 
       {/* Layer 2: UI Overlays */}
-      {gameState === 'MENU' && showTutorial && (
-        <HowToPlayScreen onNext={() => setShowTutorial(false)} />
-      )}
-      {gameState === 'MENU' && !showTutorial && (
-        <MainMenu onStart={() => setGameState('PLAYING')} onHome={onDone} />
+      {gameState === 'MENU' && (
+        <HowToPlayScreen onNext={handleFinalPartBNext} />
       )}
       {gameState === 'PLAYING' && <HUD scoreConfig={scoreConfig} />}
       {gameState === 'GAME_OVER' && (
