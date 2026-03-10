@@ -18,7 +18,7 @@ const TRAIL_DECAY = 1;
 const SCORE_UPDATE_INTERVAL = 3;
 const BASE_SCORE = 10;
 const PARTICLE_LIFE_DECAY = 0.018;
-const FLOATING_TEXT_LIFE_DECAY = 0.015;
+const FLOATING_TEXT_LIFE_DECAY = 0.006;
 const SPAWN_INTERVAL_FRAMES = 70;
 const FRENZY_SPAWN_INTERVAL = 12;
 const FRENZY_DURATION = 300;
@@ -70,6 +70,8 @@ const FRUIT_IMAGE_NAMES = [
   'STRAWBERRY.png',
   'FIG FULL.png',
 ];
+const BOMB_IMAGE_NAME = 'BOMB.png';
+const FRENZY_IMAGE_NAME = 'CREME CHEEK FRENZY.png';
 
 const GameCanvas: React.FC<GameCanvasProps> = ({
   gameState,
@@ -80,6 +82,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>(0);
   const fruitImagesRef = useRef<(HTMLImageElement | null)[]>([]);
+  const bombImageRef = useRef<HTMLImageElement | null>(null);
+  const frenzyImageRef = useRef<HTMLImageElement | null>(null);
 
   const entitiesRef = useRef<GameEntity[]>([]);
   const slicedPartsRef = useRef<SlicedPart[]>([]);
@@ -126,8 +130,16 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       return img;
     });
     fruitImagesRef.current = images;
+    const bombImg = new Image();
+    bombImg.src = `/fruits/${encodeURIComponent(BOMB_IMAGE_NAME)}`;
+    bombImageRef.current = bombImg;
+    const frenzyImg = new Image();
+    frenzyImg.src = `/fruits/${encodeURIComponent(FRENZY_IMAGE_NAME)}`;
+    frenzyImageRef.current = frenzyImg;
     return () => {
       fruitImagesRef.current = [];
+      bombImageRef.current = null;
+      frenzyImageRef.current = null;
     };
   }, []);
 
@@ -177,9 +189,48 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
           particlesRef.current.push(
             ...createExplosion(entity.x, entity.y, '#555', 20)
           );
-          isGameOverProcessingRef.current = true;
           shakeRef.current = 40;
-          onBombHit?.();
+          livesRef.current = Math.max(0, livesRef.current - 1);
+          if (livesRef.current <= 0) {
+            isGameOverProcessingRef.current = true;
+            onBombHit?.();
+          } else {
+            isGameOverProcessingRef.current = true;
+            setTimeout(() => {
+              isGameOverProcessingRef.current = false;
+            }, 500);
+          }
+          return;
+        }
+
+        if (entity.type === EntityType.FRENZY_POWERUP) {
+          toRemove.push(index);
+          frenzyTimerRef.current = FRENZY_DURATION;
+          frenzyChargeRef.current = 0;
+          const gold = '#FFD700';
+          const yellow = '#FFEB3B';
+          particlesRef.current.push(
+            ...createExplosion(entity.x, entity.y, gold, 24),
+            ...createExplosion(entity.x, entity.y, yellow, 12)
+          );
+          floatingTextsRef.current.push({
+            x: entity.x,
+            y: entity.y - 30,
+            text: 'FRENZY!',
+            color: gold,
+            life: 1.0,
+            vy: -3,
+            size: 32,
+          });
+          floatingTextsRef.current.push({
+            x: entity.x,
+            y: entity.y - 70,
+            text: '★ CREME CHEEK ★',
+            color: yellow,
+            life: 1.0,
+            vy: -2.5,
+            size: 18,
+          });
           return;
         }
 
@@ -214,22 +265,22 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
           floatingTextsRef.current.push({
             x: entity.x,
-            y: entity.y - 20,
+            y: entity.y - 24,
             text: `+${points}`,
-            color: '#FFF',
+            color: '#FFD700',
             life: 1.0,
             vy: -2,
-            size: 16,
+            size: 20,
           });
           if (comboRef.current.count >= 3) {
             floatingTextsRef.current.push({
               x: entity.x,
-              y: entity.y - 50,
+              y: entity.y - 56,
               text: `${comboRef.current.count}x COMBO!`,
               color: '#77DD77',
               life: 1.0,
               vy: -3,
-              size: 20,
+              size: 24,
             });
           }
         }
@@ -277,7 +328,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
       const gravityMult = 1;
 
-      const missed: number[] = [];
+      const offScreen: number[] = [];
       entitiesRef.current.forEach((e, i) => {
         e.x += e.vx;
         e.y += e.vy;
@@ -285,21 +336,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         e.rotation += e.rotationSpeed;
 
         if (e.y > MISSED_Y_THRESHOLD) {
-          if (e.type === EntityType.FRUIT) {
-            missed.push(i);
-            livesRef.current = Math.max(0, livesRef.current - 1);
-            comboRef.current.count = 0;
-            comboRef.current.timer = 0;
-          }
+          offScreen.push(i);
         }
       });
-      for (let i = missed.length - 1; i >= 0; i--) {
-        entitiesRef.current.splice(missed[i], 1);
-      }
-
-      if (livesRef.current <= 0) {
-        setGameState('GAME_OVER');
-        return;
+      for (let i = offScreen.length - 1; i >= 0; i--) {
+        entitiesRef.current.splice(offScreen[i], 1);
       }
 
       slicedPartsRef.current.forEach((p) => {
@@ -394,18 +435,39 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.drawImage(img, -radius, -radius, d, d);
       };
 
+      const bombImg = bombImageRef.current;
+      const frenzyImg = frenzyImageRef.current;
+
       entitiesRef.current.forEach((e) => {
         ctx.save();
         ctx.translate(e.x, e.y);
         ctx.rotate(e.rotation);
         if (e.type === EntityType.BOMB) {
-          ctx.fillStyle = BOMB_COLOR;
-          ctx.beginPath();
-          ctx.arc(0, 0, e.radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-          ctx.lineWidth = 2;
-          ctx.stroke();
+          if (bombImg?.complete && bombImg.naturalWidth > 0) {
+            const d = e.radius * 2;
+            ctx.drawImage(bombImg, -e.radius, -e.radius, d, d);
+          } else {
+            ctx.fillStyle = BOMB_COLOR;
+            ctx.beginPath();
+            ctx.arc(0, 0, e.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+        } else if (e.type === EntityType.FRENZY_POWERUP) {
+          if (frenzyImg?.complete && frenzyImg.naturalWidth > 0) {
+            const d = e.radius * 2;
+            ctx.drawImage(frenzyImg, -e.radius, -e.radius, d, d);
+          } else {
+            ctx.fillStyle = '#FFD700';
+            ctx.shadowColor = '#FFEB3B';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(0, 0, e.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
         } else {
           const idx = e.imageIndex ?? 0;
           const img = fruitImgs[idx] ?? null;
@@ -436,18 +498,33 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
       const trail = trailRef.current;
       if (trail.length >= 2) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         for (let i = 1; i < trail.length; i++) {
           const p = trail[i];
-          const width = (p.life / TRAIL_MAX_LIFE) * 12;
-          ctx.lineWidth = Math.max(1, width);
-          ctx.globalAlpha = p.life / TRAIL_MAX_LIFE;
+          const width = (p.life / TRAIL_MAX_LIFE) * 14;
+          const alpha = p.life / TRAIL_MAX_LIFE;
+          ctx.lineWidth = Math.max(2, width);
+
+          ctx.save();
+          ctx.shadowColor = '#ff9ebb';
+          ctx.shadowBlur = 12;
+          ctx.globalAlpha = alpha * 0.9;
+          ctx.strokeStyle = '#ff9ebb';
           ctx.beginPath();
           ctx.moveTo(trail[i - 1].x, trail[i - 1].y);
           ctx.lineTo(p.x, p.y);
           ctx.stroke();
+
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+          ctx.lineWidth = Math.max(1, width * 0.5);
+          ctx.beginPath();
+          ctx.moveTo(trail[i - 1].x, trail[i - 1].y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+          ctx.restore();
         }
         ctx.globalAlpha = 1;
       }

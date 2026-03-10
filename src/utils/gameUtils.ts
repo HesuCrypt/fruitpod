@@ -41,6 +41,7 @@ export const EntityType = {
   FRUIT: 'fruit',
   BOMB: 'bomb',
   POWERUP: 'powerup',
+  FRENZY_POWERUP: 'frenzy_powerup',
 } as const;
 
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
@@ -91,8 +92,9 @@ export interface Particle {
 const SPLIT_SPEED = 3.5;
 
 const BOMB_SPAWN_CHANCE = 0.12;
+const FRENZY_POWERUP_CHANCE = 0.05;
 
-/** Center-biased spawn from bottom. isFrenzy: no bombs, fruits only. */
+/** Center-biased spawn from bottom. isFrenzy: no bombs, no frenzy power-up, fruits only. */
 export function spawnEntity(
   canvasWidth: number,
   canvasHeight: number,
@@ -107,28 +109,36 @@ export function spawnEntity(
   const vx = centerBias + randomRange(-0.8, 0.8);
   const vy = randomRange(-13, -16);
 
-  const isBomb =
-    !isFrenzy && Math.random() < BOMB_SPAWN_CHANCE;
+  const radius = 48;
+  if (!isFrenzy && Math.random() < FRENZY_POWERUP_CHANCE) {
+    return {
+      id: generateId(),
+      x, y, vx, vy,
+      rotation: 0,
+      rotationSpeed: randomRange(-0.12, 0.12),
+      radius,
+      scale: 1,
+      type: EntityType.FRENZY_POWERUP,
+    };
+  }
+  const isBomb = !isFrenzy && Math.random() < BOMB_SPAWN_CHANCE;
   const imageIndex = isBomb ? undefined : Math.floor(Math.random() * 5);
 
   return {
     id: generateId(),
-    x,
-    y,
-    vx,
-    vy,
+    x, y, vx, vy,
     rotation: 0,
     rotationSpeed: randomRange(-0.12, 0.12),
-    radius: isBomb ? 36 : 32,
+    radius,
     scale: 1,
     type: isBomb ? EntityType.BOMB : EntityType.FRUIT,
     imageIndex,
   };
 }
 
-/** Two halves for fruits only; bombs don't create sliced parts. */
+/** Two halves for fruits only; bombs and frenzy power-up don't create sliced parts. */
 export function createSlicedParts(entity: GameEntity): SlicedPart[] {
-  if (entity.type === EntityType.BOMB) return [];
+  if (entity.type === EntityType.BOMB || entity.type === EntityType.FRENZY_POWERUP) return [];
   const imageIndex = entity.imageIndex ?? 0;
   return [
     {

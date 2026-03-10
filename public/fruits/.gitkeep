@@ -1,6 +1,11 @@
-# Add your fruit images here:
+# Add your fruit and game images here:
+# Fruits:
 # - GRAPES FULL.png
 # - NEW PEACH.png
 # - WATERMELON FULL.png
 # - STRAWBERRY.png
 # - FIG FULL.png
+# Bomb (avoid slicing):
+# - BOMB.png
+# Frenzy power-up (slice to trigger frenzy mode):
+# - CREME CHEEK FRENZY.png
