@@ -6,12 +6,14 @@ import PartBSlide1Screen from './components/PartBSlide1Screen';
 import PartBSlide2FinalLoadingScreen from './components/PartBSlide2FinalLoadingScreen';
 import GameContainer from './components/GameContainer';
 import PreloadVideos from './components/PreloadVideos';
+import LoadingScreen from './components/LoadingScreen';
 import MobileBlock from './components/MobileBlock';
 import RotateDeviceOverlay from './components/RotateDeviceOverlay';
 import { isMobileOrTablet, isPortrait } from './lib/device';
 import './styles/globals.css';
 
 function App() {
+  const [loadProgress, setLoadProgress] = useState({ loaded: 0, total: 1 });
   const [initialVideoReady, setInitialVideoReady] = useState(false);
   const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
@@ -67,9 +69,12 @@ function App() {
 
   return (
     <main className="relative w-full h-full overflow-hidden select-none touch-none bg-issy-pink">
-      <PreloadVideos onInitialVideoReady={() => setInitialVideoReady(true)} />
+      <PreloadVideos
+        onProgress={(loaded, total) => setLoadProgress({ loaded, total })}
+        onInitialVideoReady={() => setInitialVideoReady(true)}
+      />
       {!initialVideoReady ? (
-        <div className="w-full h-full bg-issy-pink" aria-hidden="true" />
+        <LoadingScreen loaded={loadProgress.loaded} total={loadProgress.total} />
       ) : !hasCompletedInitialLoad ? (
         <PartBSlide2FinalLoadingScreen onComplete={() => setHasCompletedInitialLoad(true)} />
       ) : !username ? (

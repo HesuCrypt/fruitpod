@@ -1,8 +1,11 @@
 import React, { useEffect, useRef } from 'react';
+import arrowBefore from '../assets/Fruit Jam Arrow Files_Before Click.png';
+import arrowAfter from '../assets/Fruit Jam Arrow After Click.png';
 
 /**
- * All video URLs used in the app. App does not start until ALL videos
- * have canplaythrough (or error) so playback is smooth with no loading.
+ * All video and image URLs used before/during the game. The app does not start
+ * until every asset has loaded (canplaythrough for videos, onload for images)
+ * so playback and UI are instant with no buffering.
  */
 const VIDEO_URLS = [
   encodeURI('/PART B_SLIDE 2_FINAL LOADING.mp4'),
@@ -12,24 +15,35 @@ const VIDEO_URLS = [
   encodeURI('/FINAL PART B_SLIDE 3.mp4'),
 ];
 
-interface PreloadVideosProps {
+const IMAGE_URLS = [arrowBefore, arrowAfter];
+
+const TOTAL_ASSETS = VIDEO_URLS.length + IMAGE_URLS.length;
+
+export interface AssetLoaderProps {
+  onProgress?: (loaded: number, total: number) => void;
   onInitialVideoReady?: () => void;
 }
 
-const PreloadVideos: React.FC<PreloadVideosProps> = ({ onInitialVideoReady }) => {
+const PreloadVideos: React.FC<AssetLoaderProps> = ({ onProgress, onInitialVideoReady }) => {
   const videosRef = useRef<HTMLVideoElement[]>([]);
   const onReadyRef = useRef(onInitialVideoReady);
+  const onProgressRef = useRef(onProgress);
   onReadyRef.current = onInitialVideoReady;
+  onProgressRef.current = onProgress;
 
   useEffect(() => {
     const videos: HTMLVideoElement[] = [];
     const style = 'position:absolute;width:0;height:0;pointer-events:none;opacity:0;';
     let readyCount = 0;
-    const total = VIDEO_URLS.length;
+
+    const reportProgress = () => {
+      onProgressRef.current?.(readyCount, TOTAL_ASSETS);
+    };
 
     const maybeDone = () => {
       readyCount += 1;
-      if (readyCount >= total) {
+      reportProgress();
+      if (readyCount >= TOTAL_ASSETS) {
         onReadyRef.current?.();
       }
     };
@@ -50,11 +64,20 @@ const PreloadVideos: React.FC<PreloadVideosProps> = ({ onInitialVideoReady }) =>
       videos.push(video);
     });
 
+    IMAGE_URLS.forEach((url) => {
+      const img = new Image();
+      img.onload = maybeDone;
+      img.onerror = maybeDone;
+      img.src = url;
+    });
+
     videosRef.current = videos;
+    reportProgress();
+
     return () => {
       videosRef.current.forEach((v) => {
         v.src = '';
-        document.body.removeChild(v);
+        if (v.parentNode) document.body.removeChild(v);
       });
       videosRef.current = [];
     };

@@ -5,14 +5,17 @@ interface HUDProps {
   scoreConfig: ScoreUpdatePayload;
 }
 
+const SCORE_GOAL = 100_000;
+
 const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
   const { score, lives, combo, frenzyProgress, isFrenzy } = scoreConfig;
   const pct = Math.min(100, Math.max(0, frenzyProgress * 100));
+  const scoreProgressPct = Math.min(100, (score / SCORE_GOAL) * 100);
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-4 font-pixel">
       <div className="flex justify-between items-start w-full">
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start w-full max-w-[70%]">
           <div className="flex items-center gap-2 drop-shadow-[1px_1px_0_rgba(255,255,255,0.5)]">
             <span className="text-sm sm:text-base uppercase text-gray-400">
               Score
@@ -20,6 +23,17 @@ const HUD: React.FC<HUDProps> = ({ scoreConfig }) => {
             <span className="text-4xl sm:text-5xl font-bold text-black">
               {String(score).padStart(5, '0')}
             </span>
+          </div>
+          <div className="mt-2 w-full max-w-xs">
+            <div className="h-2 w-full bg-neutral-800 border border-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-issy-accent transition-all duration-150 rounded-full"
+                style={{ width: `${scoreProgressPct}%` }}
+              />
+            </div>
+            <div className="mt-0.5 text-xs text-gray-500">
+              Goal: 100,000
+            </div>
           </div>
           {combo > 0 && (
             <div className="mt-2 text-green-400 text-xl sm:text-2xl font-bold drop-shadow-[1px_1px_0_#FFF]">
