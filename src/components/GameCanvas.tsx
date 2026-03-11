@@ -29,6 +29,7 @@ interface GameCanvasProps {
   setGameState: (state: 'MENU' | 'PLAYING' | 'GAME_OVER') => void;
   onScoreUpdate?: (config: ScoreUpdatePayload) => void;
   onBombHit?: () => void;
+  isPaused?: boolean;
 }
 
 const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -36,6 +37,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   setGameState: _setGameState,
   onScoreUpdate,
   onBombHit,
+  isPaused = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
@@ -78,21 +80,40 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     };
   }, [onScoreUpdate, onBombHit]);
 
+  const prevGameStateRef = useRef<typeof gameState>(gameState);
+
   useEffect(() => {
-    if (gameState !== 'PLAYING') return;
     const engine = engineRef.current;
     const canvas = canvasRef.current;
     if (!engine || !canvas) return;
+
+    const previousState = prevGameStateRef.current;
+    prevGameStateRef.current = gameState;
+
+    if (gameState !== 'PLAYING') {
+      engine.stopLoop();
+      engine.setContext(null);
+      return;
+    }
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     engine.setContext(ctx);
-    engine.reset();
-    engine.startLoop();
+
+    const justEnteredPlaying = previousState !== 'PLAYING';
+    if (justEnteredPlaying) engine.reset();
+
+    if (isPaused) {
+      engine.stopLoop();
+    } else {
+      engine.startLoop();
+    }
+
     return () => {
       engine.stopLoop();
       engine.setContext(null);
     };
-  }, [gameState]);
+  }, [gameState, isPaused]);
 
   const toCanvas = useCallback((clientX: number, clientY: number) => {
     return getCanvasCoords(clientX, clientY, canvasRef.current);

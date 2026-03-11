@@ -143,7 +143,12 @@ export function spawnEntity(
   const radius = 48;
   const edgeInset = 28;
   const padding = radius + edgeInset;
-  const x = randomRange(padding, canvasWidth - padding);
+  const centerMin = canvasWidth * 0.25;
+  const centerMax = canvasWidth * 0.75;
+  const x = randomRange(
+    Math.max(padding, centerMin),
+    Math.min(canvasWidth - padding, centerMax)
+  );
   const y = canvasHeight + randomRange(20, 60);
 
   const angle = -Math.PI / 2 + randomRange(-0.35, 0.35);

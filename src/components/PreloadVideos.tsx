@@ -27,6 +27,11 @@ const GAME_IMAGE_URLS = [
   `/fruits/${encodeURIComponent('BOMB.png')}`,
   `/fruits/${encodeURIComponent('BOMB EXPLOSION 2.png')}`,
   `/fruits/${encodeURIComponent('CREME CHEEK FRENZY.png')}`,
+  `/fruits/${encodeURIComponent('SETTINGS BUTTON.png')}`,
+  `/fruits/${encodeURIComponent('PAUSE BUTTON.png')}`,
+  `/fruits/${encodeURIComponent('SOUND.png')}`,
+  `/fruits/${encodeURIComponent('MUTE.png')}`,
+  `/fruits/${encodeURIComponent('ESSENCE BAR ART WITH BG.png')}`,
 ];
 
 const IMAGE_URLS = [arrowBefore, arrowAfter];

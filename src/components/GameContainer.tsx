@@ -3,6 +3,7 @@ import GameCanvas, { type ScoreUpdatePayload } from './GameCanvas';
 import HUD from './game/HUD';
 import GameOver from './game/GameOver';
 import HowToPlayScreen from './game/HowToPlayScreen';
+import GameSettings from './game/GameSettings';
 
 export type GameState = 'MENU' | 'PLAYING' | 'GAME_OVER';
 
@@ -22,6 +23,9 @@ const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
   const [gameState, setGameState] = useState<GameState>('MENU');
   const [scoreConfig, setScoreConfig] = useState<ScoreUpdatePayload>(initialScoreConfig);
   const [whiteoutActive, setWhiteoutActive] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   const handleBombHit = useCallback(() => {
     setWhiteoutActive(true);
@@ -33,10 +37,14 @@ const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
 
   const handleRestart = useCallback(() => {
     setGameState('PLAYING');
+    setScoreConfig(initialScoreConfig);
+    setIsPaused(false);
   }, []);
 
   const handleFinalPartBNext = useCallback(() => {
     setGameState('PLAYING');
+    setScoreConfig(initialScoreConfig);
+    setIsPaused(false);
   }, []);
 
   return (
@@ -48,6 +56,7 @@ const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
           setGameState={setGameState}
           onScoreUpdate={setScoreConfig}
           onBombHit={handleBombHit}
+          isPaused={isPaused}
         />
       </div>
 
@@ -55,12 +64,28 @@ const GameContainer: React.FC<GameContainerProps> = ({ onDone }) => {
       {gameState === 'MENU' && (
         <HowToPlayScreen onNext={handleFinalPartBNext} />
       )}
-      {gameState === 'PLAYING' && <HUD scoreConfig={scoreConfig} />}
+      {gameState === 'PLAYING' && (
+        <HUD 
+          scoreConfig={scoreConfig} 
+          isPaused={isPaused}
+          onPause={() => setIsPaused((prev) => !prev)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
+      )}
       {gameState === 'GAME_OVER' && (
         <GameOver
           score={scoreConfig.score}
           onRestart={handleRestart}
           onHome={onDone ?? (() => setGameState('MENU'))}
+        />
+      )}
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <GameSettings 
+          onClose={() => setIsSettingsOpen(false)}
+          soundEnabled={soundEnabled}
+          onSoundToggle={() => setSoundEnabled((prev) => !prev)}
         />
       )}
 

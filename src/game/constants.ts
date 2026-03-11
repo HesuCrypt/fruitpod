@@ -51,4 +51,10 @@ export const BOMB_EXPLOSION_IMAGE_NAME = 'BOMB EXPLOSION 2.png';
 export const BOMB_EXPLOSION_DURATION_MS = 500;
 export const FRENZY_IMAGE_NAME = 'CREME CHEEK FRENZY.png';
 
+export const UI_SETTINGS_BUTTON = 'SETTINGS BUTTON.png';
+export const UI_PAUSE_BUTTON = 'PAUSE BUTTON.png';
+export const UI_SOUND = 'SOUND.png';
+export const UI_MUTE = 'MUTE.png';
+export const UI_ESSENCE_BAR_ART = 'ESSENCE BAR ART WITH BG.png';
+
 export const SCORE_GOAL = 100_000;

@@ -69,9 +69,40 @@ const FRENZY_PINK_COLORS = [
   [255, 150, 200],   // bright pink
 ];
 
+const FRENZY_BG_COLOR = '#f0e0f8';
+const FALLING_STAR_COUNT = 55;
+
+function drawFrenzyStarShower(ctx: CanvasRenderingContext2D, nowMs: number): void {
+  for (let i = 0; i < FALLING_STAR_COUNT; i++) {
+    const seed = i * 1.618033989;
+    const phase = (seed * 1000) % 1;
+    const fallSpeed = 0.12 + (i % 5) * 0.04;
+    const x = ((i * 37 + (nowMs * 0.03) * (1 + (i % 3) * 0.5)) % (CANVAS_WIDTH + 60)) - 30;
+    const y = ((phase * (CANVAS_HEIGHT + 120) + (nowMs * fallSpeed)) % (CANVAS_HEIGHT + 120)) - 40;
+    const size = 2 + (i % 3);
+    const twinkle = 0.4 + 0.5 * Math.sin(nowMs * 0.008 + i * 2.1);
+    ctx.save();
+    ctx.shadowColor = 'rgba(255, 255, 220, 0.95)';
+    ctx.shadowBlur = 8 + size * 2;
+    ctx.fillStyle = `rgba(255, 255, 240, ${twinkle})`;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = `rgba(255, 250, 200, ${twinkle * 0.9})`;
+    ctx.beginPath();
+    ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
 function drawFrenzyOverlay(ctx: CanvasRenderingContext2D, nowMs: number): void {
-  const pulse = 0.1 + 0.06 * Math.sin(nowMs * 0.003);
-  const flicker = 0.05 + 0.04 * Math.sin(nowMs * 0.012);
+  ctx.fillStyle = FRENZY_BG_COLOR;
+  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  drawFrenzyStarShower(ctx, nowMs);
+  const pulse = 0.08 + 0.05 * Math.sin(nowMs * 0.003);
+  const flicker = 0.04 + 0.03 * Math.sin(nowMs * 0.012);
   ctx.fillStyle = `rgba(255, 105, 180, ${pulse})`;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   ctx.fillStyle = `rgba(255, 182, 193, ${flicker})`;
@@ -154,9 +185,21 @@ export function render(
   ctx.translate(shakeX, shakeY);
 
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  if (isFrenzy) drawFrenzyOverlay(ctx, nowMs);
-  ctx.fillStyle = '#fcfcfc';
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  if (isFrenzy) {
+    drawFrenzyOverlay(ctx, nowMs);
+  } else {
+    ctx.fillStyle = '#fcfcfc';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.fillStyle = 'rgba(0,0,0,0.06)';
+    const gridStep = 24;
+    for (let gx = 0; gx <= CANVAS_WIDTH; gx += gridStep) {
+      for (let gy = 0; gy <= CANVAS_HEIGHT; gy += gridStep) {
+        ctx.beginPath();
+        ctx.arc(gx, gy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
 
   const { fruitImages, bombImage, bombExplosionImage, frenzyImage } = assets;
 
@@ -292,10 +335,25 @@ export function render(
     const ft = state.floatingTexts[i];
     ctx.save();
     ctx.globalAlpha = ft.life;
+    ctx.font = `bold ${ft.size ?? 14}px 'Acknowledge TT', ${PIXEL_FONT}`;
+    ctx.textAlign = 'center';
+    
+    // Shadow 
+    ctx.shadowColor = '#3f2832';
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+    
+    // Fill
     ctx.fillStyle = ft.color;
     ctx.font = `bold ${ft.size ?? 14}px ${PIXEL_FONT}`;
-    ctx.textAlign = 'center';
     ctx.fillText(ft.text, ft.x, ft.y);
+    
+    // Stroke
+    ctx.shadowColor = 'transparent'; // Remove shadow for stroke
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#3f2832';
+    ctx.strokeText(ft.text, ft.x, ft.y);
+    
     ctx.restore();
   }
 
