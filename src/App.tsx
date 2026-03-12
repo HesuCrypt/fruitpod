@@ -85,7 +85,7 @@ function App() {
       ) : !hasCompletedPartBSlide2Final ? (
         <PartBSlide2FinalLoadingScreen onComplete={() => setHasCompletedPartBSlide2Final(true)} />
       ) : !hasCompletedGame ? (
-        <GameContainer onDone={() => setHasCompletedGame(true)} />
+        <GameContainer username={username} onDone={() => setHasCompletedGame(true)} />
       ) : (
         <div className="flex flex-col items-center justify-center w-full h-full bg-issy-pink">
           <div className="font-pixel text-lg text-issy-accent uppercase animate-pulse">

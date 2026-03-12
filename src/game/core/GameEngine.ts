@@ -102,12 +102,14 @@ export class GameEngine {
       isFrenzy
     );
     if (spawnResult) {
-      s.entities.push(spawnResult.entity);
+      for (let i = 0; i < spawnResult.entities.length && s.entities.length < MAX_ENTITIES; i++) {
+        s.entities.push(spawnResult.entities[i]);
+      }
       s.spawn.nextSpawnTime = spawnResult.nextSpawnTime;
       if (spawnResult.lastCremeCheekSpawnTime !== undefined) {
         s.spawn.lastCremeCheekSpawnTime = spawnResult.lastCremeCheekSpawnTime;
       }
-      if (spawnResult.entity.type === EntityType.FRENZY_POWERUP) {
+      if (spawnResult.entities[0]?.type === EntityType.FRENZY_POWERUP) {
         s.spawn.nextSpawnTime = s.time + FRENZY_SPAWN_INTERVAL_BASE;
       }
     }

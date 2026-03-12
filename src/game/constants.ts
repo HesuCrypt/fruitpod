@@ -15,14 +15,14 @@ export const BASE_SCORE = 10;
 export const PARTICLE_LIFE_DECAY = 0.018;
 export const FLOATING_TEXT_LIFE_DECAY = 0.006;
 
-export const SPAWN_INTERVAL_BASE = 35;
-export const SPAWN_INTERVAL_VARIANCE = 12;
-export const FRENZY_SPAWN_INTERVAL_BASE = 6;
-export const FRENZY_SPAWN_VARIANCE = 2;
+export const SPAWN_INTERVAL_BASE = 17.5;
+export const SPAWN_INTERVAL_VARIANCE = 6;
+export const FRENZY_SPAWN_INTERVAL_BASE = 1.5;
+export const FRENZY_SPAWN_VARIANCE = 0.5;
 export const FRENZY_DURATION_MS = 10_000;
 export const CREME_CHEEK_COOLDOWN_MS = 60_000;
-export const FRENZY_CHARGE_PER_SLICE = 4;
-export const FRENZY_CHARGE_BONUS_COMBO = 2;
+/** Progress bar fills when frenzy points reach this (points from slicing). */
+export const FRENZY_POINTS_TO_FULL = 10_000;
 export const FRENZY_MAX_CHARGE = 100;
 export const FRENZY_POP_IN_DURATION_MS = 400;
 

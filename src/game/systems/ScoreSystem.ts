@@ -5,10 +5,9 @@
 
 import {
   BASE_SCORE,
-  FRENZY_CHARGE_PER_SLICE,
-  FRENZY_CHARGE_BONUS_COMBO,
   FRENZY_MAX_CHARGE,
   FRENZY_DURATION_MS,
+  FRENZY_POINTS_TO_FULL,
 } from '../constants';
 
 export interface ComboState {
@@ -41,16 +40,10 @@ export function computePoints(
   return BASE_SCORE * multiplier * (isFrenzy ? 2 : 1);
 }
 
-export function addFrenzyCharge(
-  charge: number,
-  comboCount: number
-): number {
-  return Math.min(
-    FRENZY_MAX_CHARGE,
-    charge +
-      FRENZY_CHARGE_PER_SLICE +
-      (comboCount >= 3 ? FRENZY_CHARGE_BONUS_COMBO : 0)
-  );
+/** Progress bar fills at 10,000 points. Each slice adds (pointsEarned / 100) to charge (0–100). */
+export function addFrenzyCharge(charge: number, pointsEarned: number): number {
+  const add = (pointsEarned / FRENZY_POINTS_TO_FULL) * FRENZY_MAX_CHARGE;
+  return Math.min(FRENZY_MAX_CHARGE, charge + add);
 }
 
 export function frenzyProgress(

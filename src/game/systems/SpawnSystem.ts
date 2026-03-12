@@ -1,9 +1,9 @@
 /**
  * SpawnSystem: controls when and what to spawn (fruits, bombs, Creme Cheek).
- * Enforces Creme Cheek 60s cooldown and max entities.
+ * Double fruit spawn, double bomb spawn; frenzy: double spam + fruit from top.
  */
 
-import { spawnEntity } from '../../utils/gameUtils';
+import { spawnEntity, spawnEntityFromTop, spawnBomb } from '../../utils/gameUtils';
 import type { GameEntity } from '../../utils/gameUtils';
 import {
   CANVAS_WIDTH,
@@ -35,15 +35,14 @@ export function resetSpawnState(state: SpawnState): void {
 }
 
 /**
- * Returns a new entity to spawn, or null if no spawn this frame.
- * gameTime: current game time (accumulated scale).
+ * Returns entities to spawn (1 or 2; frenzy may add from-top fruit), or null if no spawn this frame.
  */
 export function trySpawn(
   gameTime: number,
   spawnState: SpawnState,
   entityCount: number,
   isFrenzy: boolean
-): { entity: GameEntity; nextSpawnTime: number; lastCremeCheekSpawnTime?: number } | null {
+): { entities: GameEntity[]; nextSpawnTime: number; lastCremeCheekSpawnTime?: number } | null {
   if (entityCount >= MAX_ENTITIES) return null;
   if (gameTime < spawnState.nextSpawnTime) return null;
 
@@ -52,16 +51,27 @@ export function trySpawn(
     !isFrenzy && nowMs - spawnState.lastCremeCheekSpawnTime >= CREME_CHEEK_COOLDOWN_MS;
   const entity = spawnEntity(CANVAS_WIDTH, CANVAS_HEIGHT, isFrenzy, allowCremeCheek);
 
+  const entities: GameEntity[] = [entity];
+  if (entity.type === EntityType.FRUIT && entityCount + 1 < MAX_ENTITIES) {
+    entities.push(spawnEntity(CANVAS_WIDTH, CANVAS_HEIGHT, isFrenzy, false));
+  }
+  if (entity.type === EntityType.BOMB && entityCount + entities.length < MAX_ENTITIES) {
+    entities.push(spawnBomb(CANVAS_WIDTH, CANVAS_HEIGHT));
+  }
+  if (isFrenzy && entity.type === EntityType.FRUIT && entityCount + entities.length < MAX_ENTITIES) {
+    entities.push(spawnEntityFromTop(CANVAS_WIDTH, CANVAS_HEIGHT));
+  }
+
   const baseInterval = isFrenzy ? FRENZY_SPAWN_INTERVAL_BASE : SPAWN_INTERVAL_BASE;
   const variance = isFrenzy ? FRENZY_SPAWN_VARIANCE : SPAWN_INTERVAL_VARIANCE;
   const nextSpawnTime =
     gameTime + baseInterval + (Math.random() * 2 - 1) * variance;
 
   const result: {
-    entity: GameEntity;
+    entities: GameEntity[];
     nextSpawnTime: number;
     lastCremeCheekSpawnTime?: number;
-  } = { entity, nextSpawnTime };
+  } = { entities, nextSpawnTime };
   if (entity.type === EntityType.FRENZY_POWERUP) {
     result.lastCremeCheekSpawnTime = nowMs;
   }

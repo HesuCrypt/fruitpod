@@ -124,7 +124,7 @@ export interface Particle {
 const SPLIT_SPEED = 9;
 const SLICE_HALF_FALL_BOOST = 3;
 
-const BOMB_SPAWN_CHANCE = 0.12;
+const BOMB_SPAWN_CHANCE = 0.24;
 /** When allowCremeCheek is true, this chance is used (only one Creme Cheek per 60s in GameCanvas). */
 const FRENZY_POWERUP_CHANCE = 1;
 
@@ -143,17 +143,13 @@ export function spawnEntity(
   const radius = 48;
   const edgeInset = 28;
   const padding = radius + edgeInset;
-  const centerMin = canvasWidth * 0.25;
-  const centerMax = canvasWidth * 0.75;
-  const x = randomRange(
-    Math.max(padding, centerMin),
-    Math.min(canvasWidth - padding, centerMax)
-  );
+  const centerX = canvasWidth * 0.5;
+  const x = Math.max(padding, Math.min(canvasWidth - padding, centerX + randomRange(-canvasWidth * 0.15, canvasWidth * 0.15)));
   const y = canvasHeight + randomRange(20, 60);
 
   const angle = -Math.PI / 2 + randomRange(-0.35, 0.35);
-  const speed = randomRange(11, 16);
-  const vx = Math.cos(angle) * speed * randomRange(0.06, 0.12);
+  const speed = randomRange(12, 16);
+  const vx = 0;
   const vy = -Math.abs(Math.sin(angle) * speed);
 
   if (!isFrenzy && allowCremeCheek && Math.random() < FRENZY_POWERUP_CHANCE) {
@@ -179,6 +175,51 @@ export function spawnEntity(
     scale: 1,
     type: isBomb ? EntityType.BOMB : EntityType.FRUIT,
     imageIndex,
+  };
+}
+
+/** Spawn only a bomb (for double-bomb spawn). */
+export function spawnBomb(canvasWidth: number, canvasHeight: number): GameEntity {
+  const radius = 48;
+  const edgeInset = 28;
+  const padding = radius + edgeInset;
+  const centerX = canvasWidth * 0.5;
+  const x = Math.max(padding, Math.min(canvasWidth - padding, centerX + randomRange(-canvasWidth * 0.15, canvasWidth * 0.15)));
+  const y = canvasHeight + randomRange(20, 60);
+  const speed = randomRange(12, 16);
+  const vx = 0;
+  const vy = -Math.abs(Math.sin(-Math.PI / 2 + randomRange(-0.35, 0.35)) * speed);
+  return {
+    id: generateId(),
+    x, y, vx, vy,
+    rotation: randomRange(0, Math.PI * 2),
+    rotationSpeed: randomRange(-0.18, 0.18),
+    radius,
+    scale: 1,
+    type: EntityType.BOMB,
+  };
+}
+
+/** Spawn a fruit from the top of the screen (falling down). Frenzy only. */
+export function spawnEntityFromTop(canvasWidth: number, _canvasHeight: number): GameEntity {
+  const radius = 48;
+  const edgeInset = 28;
+  const padding = radius + edgeInset;
+  const centerX = canvasWidth * 0.5;
+  const x = Math.max(padding, Math.min(canvasWidth - padding, centerX + randomRange(-canvasWidth * 0.2, canvasWidth * 0.2)));
+  const y = -radius - randomRange(0, 40);
+  const speed = randomRange(8, 14);
+  const vx = 0;
+  const vy = speed;
+  return {
+    id: generateId(),
+    x, y, vx, vy,
+    rotation: randomRange(0, Math.PI * 2),
+    rotationSpeed: randomRange(-0.12, 0.12),
+    radius,
+    scale: 1,
+    type: EntityType.FRUIT,
+    imageIndex: Math.floor(Math.random() * 5),
   };
 }
 
