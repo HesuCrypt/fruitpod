@@ -134,21 +134,16 @@ const HUD: React.FC<HUDProps> = ({ scoreConfig, isPaused, onPause, onOpenSetting
         </div>
       </div>
 
-      {/* ESSENCE BAR ART — placement (see line numbers in this comment)
-        • Line 135: outer wrapper — vertical position
-          - pb-[clamp(8px,2.5vw,20px)] = space from bottom (increase to move bar higher)
-          - pt-3 = space above bar (e.g. pt-6 = more gap)
-        • Line 136: inner wrapper — size and horizontal position
-          - w-[140%] = width (e.g. 160% = bigger, 100% = screen width)
-          - -mx-[20%] = centers when w>100% (e.g. w-[160%] use -mx-[30%])
-          - Add -ml-4 or mr-4 to nudge left/right
-      */}
+      {/* ESSENCE BAR — manual placement (line numbers):
+        IMAGE: Line 147 = width (w-[120%]) and horizontal center (-mx-[20%]). Line 148–151 = <img>.
+        PROGRESS BAR: Line 159 = top (vertical), Line 160 = left (horizontal), 161 = width, 162 = height.
+        WRAPPER: Line 146 = pb = distance from bottom (↑ = move up), pt = gap above bar. */}
       <div className="w-full flex flex-col items-center flex-shrink-0 min-h-0 pb-[clamp(12px,3vw,20px)] pt-1 pointer-events-none">
         <div className="relative w-[120%] max-w-[none] -mx-[20%] flex flex-col items-center gap-1">
           <img
             src={`/fruits/${encodeURIComponent(UI_ESSENCE_BAR_ART)}`}
             alt=""
-            className="w-full h-auto object-contain z-10"
+            className="w-full h-auto object-contain z-8"
           />
           {/* Progress Bar (50,000 points) */}
           <div

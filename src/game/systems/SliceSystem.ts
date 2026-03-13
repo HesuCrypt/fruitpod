@@ -17,7 +17,6 @@ import {
   JUICE_COLOR,
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
-  FRENZY_MAX_CHARGE,
 } from '../constants';
 import { computePoints, addFrenzyCharge } from './ScoreSystem';
 
@@ -147,15 +146,6 @@ export function processSwipe(
       const points = computePoints(runningCombo, isFrenzy);
       result.scoreDelta += points;
       runningCharge = addFrenzyCharge(runningCharge, points);
-      if (!isFrenzy && runningCharge >= FRENZY_MAX_CHARGE) {
-        result.activateFrenzy = true;
-        runningCharge = 0;
-        result.spawnExtraFruits.push(
-          spawnEntity(CANVAS_WIDTH, CANVAS_HEIGHT, true),
-          spawnEntity(CANVAS_WIDTH, CANVAS_HEIGHT, true),
-          spawnEntity(CANVAS_WIDTH, CANVAS_HEIGHT, true),
-        );
-      }
       result.frenzyCharge = runningCharge;
       result.floatingTexts.push({
         x: entity.x,

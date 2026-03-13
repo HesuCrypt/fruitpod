@@ -50,15 +50,18 @@ const UsernameScreen: React.FC<UsernameScreenProps> = ({ onContinue }) => {
                             id="username"
                             type="text"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
+                            onChange={(e) => setUsername(e.target.value)}
                             onKeyPress={handleKeyPress}
-                            placeholder="YOUR_USERNAME"
+                            placeholder="Type your username"
+                            style={{ textTransform: 'none', fontFamily: 'var(--font-pixel-input)' }}
                             className={cn(
-                                "w-full h-14 bg-white px-4 pr-20 font-pixel text-lg outline-none",
+                                "w-full h-14 bg-white px-4 pr-20 text-lg outline-none",
                                 "border-4 border-black border-r-0 rounded-l-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)]",
                                 "placeholder:text-gray-300 transition-all focus:bg-pink-50"
                             )}
                             autoComplete="off"
+                            autoCapitalize="off"
+                            autoCorrect="off"
                             autoFocus
                         />
                     </div>
@@ -84,7 +87,7 @@ const UsernameScreen: React.FC<UsernameScreenProps> = ({ onContinue }) => {
                 </div>
 
                 <p className="font-pixel text-sm text-white opacity-60 text-center leading-loose drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
-                    USE ALPHANUMERIC AND UNDERSCORE ONLY
+                    Enter your username exactly as you want it displayed
                 </p>
             </div>
         </div>

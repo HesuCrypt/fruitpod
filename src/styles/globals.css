@@ -15,9 +15,11 @@
   --color-issy-accentDark: #cd4c6f;
 
   --font-pixel: "Acknowledge TT", cursive;
+  --font-pixel-input: "Pixelify Sans", "Acknowledge TT", cursive;
 }
 
 :root {
+  --font-pixel-input: "Pixelify Sans", "Acknowledge TT", cursive;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;

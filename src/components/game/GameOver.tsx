@@ -86,7 +86,7 @@ const GameOver: React.FC<GameOverProps> = ({
             style={{ backgroundColor: '#E03D72' }}
             aria-label="Leaderboard"
           >
-            <svg viewBox="0 0 24 24" className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="currentColor" aria-hidden>
+            <svg viewBox="0 0 24 24" className="w-15 h-20 sm:w-15 sm:h-20 text-white" fill="currentColor" aria-hidden>
               <path d="M12 2C10.9 2 10 2.9 10 4v1H6c-1.1 0-2 .9-2 2v2c0 2.2 1.8 4 4 4 .6 1.2 1.5 2.1 2.5 1.2-.9 2.2-2.1 2.7-3.5.4.6.9 1.1 1.5 1.5-.5 1.4-1.5 2.6-2.7 3.5 1-.9 1.9-2.1 2.5-3.5 1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-4V4c0-1.1-.9-2-2-2zm-2 6h4v2h-4V8zm0 4h4v2h-4v-2zm-2 6h2v2H8v-2zm6 0h2v2h-2v-2z" />
             </svg>
           </button>

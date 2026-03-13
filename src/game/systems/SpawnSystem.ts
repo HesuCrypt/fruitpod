@@ -3,7 +3,7 @@
  * Double fruit spawn, double bomb spawn; frenzy: double spam + fruit from top.
  */
 
-import { spawnEntity, spawnEntityFromTop, spawnBomb } from '../../utils/gameUtils';
+import { spawnEntity, spawnEntityFromTop } from '../../utils/gameUtils';
 import type { GameEntity } from '../../utils/gameUtils';
 import {
   CANVAS_WIDTH,
@@ -52,15 +52,15 @@ export function trySpawn(
   const entity = spawnEntity(CANVAS_WIDTH, CANVAS_HEIGHT, isFrenzy, allowCremeCheek);
 
   const entities: GameEntity[] = [entity];
-  if (entity.type === EntityType.FRUIT && entityCount + 1 < MAX_ENTITIES) {
-    entities.push(spawnEntity(CANVAS_WIDTH, CANVAS_HEIGHT, isFrenzy, false));
+
+  if (entity.type === EntityType.FRUIT) {
+    // Minimal fruit: only the single fruit (no burst). Frenzy adds one from top.
+    if (isFrenzy && entityCount + entities.length < MAX_ENTITIES) {
+      entities.push(spawnEntityFromTop(CANVAS_WIDTH, CANVAS_HEIGHT));
+    }
   }
-  if (entity.type === EntityType.BOMB && entityCount + entities.length < MAX_ENTITIES) {
-    entities.push(spawnBomb(CANVAS_WIDTH, CANVAS_HEIGHT));
-  }
-  if (isFrenzy && entity.type === EntityType.FRUIT && entityCount + entities.length < MAX_ENTITIES) {
-    entities.push(spawnEntityFromTop(CANVAS_WIDTH, CANVAS_HEIGHT));
-  }
+  // Bombs and other types (Creme Cheek) remain as single entities per spawn event
+  // based on the logic above (they are added to 'entities' array only at start).
 
   const baseInterval = isFrenzy ? FRENZY_SPAWN_INTERVAL_BASE : SPAWN_INTERVAL_BASE;
   const variance = isFrenzy ? FRENZY_SPAWN_VARIANCE : SPAWN_INTERVAL_VARIANCE;

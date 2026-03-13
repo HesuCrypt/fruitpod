@@ -124,7 +124,7 @@ export interface Particle {
 const SPLIT_SPEED = 9;
 const SLICE_HALF_FALL_BOOST = 3;
 
-const BOMB_SPAWN_CHANCE = 0.24;
+const BOMB_SPAWN_CHANCE = 0.04;
 /** When allowCremeCheek is true, this chance is used (only one Creme Cheek per 60s in GameCanvas). */
 const FRENZY_POWERUP_CHANCE = 1;
 

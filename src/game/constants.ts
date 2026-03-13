@@ -15,11 +15,12 @@ export const BASE_SCORE = 10;
 export const PARTICLE_LIFE_DECAY = 0.018;
 export const FLOATING_TEXT_LIFE_DECAY = 0.006;
 
-export const SPAWN_INTERVAL_BASE = 17.5;
-export const SPAWN_INTERVAL_VARIANCE = 6;
+export const SPAWN_INTERVAL_BASE = 20;
+export const SPAWN_INTERVAL_VARIANCE = 2;
 export const FRENZY_SPAWN_INTERVAL_BASE = 1.5;
 export const FRENZY_SPAWN_VARIANCE = 0.5;
 export const FRENZY_DURATION_MS = 10_000;
+/** Frenzy power-up (Creme Cheek) can only appear once per minute. */
 export const CREME_CHEEK_COOLDOWN_MS = 60_000;
 /** Progress bar fills when frenzy points reach this (points from slicing). */
 export const FRENZY_POINTS_TO_FULL = 10_000;
@@ -51,9 +52,9 @@ export const BOMB_EXPLOSION_IMAGE_NAME = 'BOMB EXPLOSION 2.png';
 export const BOMB_EXPLOSION_DURATION_MS = 500;
 export const FRENZY_IMAGE_NAME = 'CREME CHEEK FRENZY.png';
 
-export const UI_SETTINGS_BUTTON = 'SETTINGS BUTTON.png';
+export const UI_SETTINGS_BUTTON = 'SOUND.png';
 export const UI_PAUSE_BUTTON = 'PAUSE BUTTON.png';
-export const UI_SOUND = 'SOUND.png';
+export const UI_SOUND = '';
 export const UI_MUTE = 'MUTE.png';
 export const UI_ESSENCE_BAR_ART = 'ESSENCE BAR ART WITH BG.png';
 

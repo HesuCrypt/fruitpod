@@ -64,7 +64,7 @@ const HowToPlayScreen: React.FC<HowToPlayScreenProps> = ({ onNext }) => {
         className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 pt-8 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"
         style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
       >
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto ml-5">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -72,7 +72,7 @@ const HowToPlayScreen: React.FC<HowToPlayScreenProps> = ({ onNext }) => {
               onChange={(e) => setDontShowAgain(e.target.checked)}
               className="w-5 h-5 rounded border-2 border-white accent-issy-accent"
             />
-            <span className="text-xs sm:text-sm uppercase text-white drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)]">
+            <span className="text-lg sm:text-xl uppercase text-white drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)]">
               Do not show again
             </span>
           </label>
